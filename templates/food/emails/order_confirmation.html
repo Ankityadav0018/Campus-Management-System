@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .success-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+        .content {
+            background: #fff;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+        }
+        .order-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .order-info p {
+            margin: 8px 0;
+        }
+        .order-info strong {
+            color: #11998e;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+        .items-table th {
+            background: #11998e;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+        .items-table .item-name {
+            font-weight: 600;
+            color: #333;
+        }
+        .items-table .item-price {
+            text-align: right;
+        }
+        .total-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 16px;
+        }
+        .total-row.grand-total {
+            border-top: 2px solid #11998e;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-weight: bold;
+            font-size: 20px;
+            color: #11998e;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #ffa726;
+            color: white;
+        }
+        .highlight-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="success-icon">✅</div>
+        <h1>Order Confirmed!</h1>
+        <p style="margin: 10px 0 0 0; font-size: 16px;">Thank you for your order</p>
+    </div>
+    
+    <div class="content">
+        <p style="font-size: 18px; margin-top: 0;">
+            Hi <strong>{{ customer_name }}</strong>,
+        </p>
+        <p>
+            Your order has been successfully placed and sent to <strong>{{ stall.name }}</strong>. 
+            Your food will be prepared and ready for pickup at the scheduled time.
+        </p>
+
+        <div class="order-info">
+            <h2 style="margin-top: 0; color: #11998e;">Order Summary</h2>
+            <p><strong>Order ID:</strong> #{{ order.id }}</p>
+            <p><strong>Restaurant:</strong> {{ stall.name }}</p>
+            <p><strong>Order Time:</strong> {{ order.time_slot|date:"F d, Y H:i" }}</p>
+            <p><strong>Pickup Time:</strong> {{ order.pickup_time_slot }}</p>
+            <p><strong>Payment Method:</strong> {{ payment_method }}</p>
+            <p><strong>Status:</strong> <span class="status-badge">{{ order.get_status_display }}</span></p>
+        </div>
+
+        <div class="highlight-box">
+            <strong>📍 Pickup Location:</strong> {{ stall.name }}<br>
+            <strong>⏰ Pickup Time:</strong> {{ order.pickup_time_slot }}
+            {% if stall.contact_phone %}
+            <br><strong>📞 Contact:</strong> {{ stall.contact_phone }}
+            {% endif %}
+        </div>
+
+        <h3 style="color: #11998e;">Your Items</h3>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th style="text-align: center;">Qty</th>
+                    <th style="text-align: right;">Price</th>
+                    <th style="text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order_items %}
+                <tr>
+                    <td class="item-name">{{ item.food_item.name }}</td>
+                    <td style="text-align: center;">{{ item.quantity }}</td>
+                    <td class="item-price">₹{{ item.price_at_order }}</td>
+                    <td class="item-price">₹{{ item.price_at_order|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if order.special_instructions %}
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <strong style="color: #1976d2;">Special Instructions:</strong><br>
+            {{ order.special_instructions }}
+        </div>
+        {% endif %}
+
+        <div class="total-section">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span>₹{{ subtotal|floatformat:2 }}</span>
+            </div>
+            <div class="total-row">
+                <span>Tax (5%):</span>
+                <span>₹{{ tax|floatformat:2 }}</span>
+            </div>
+            <div class="total-row grand-total">
+                <span>Total Amount:</span>
+                <span>₹{{ order.total_price }}</span>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin: 0; color: #666; font-size: 14px;">
+                You will receive a notification when your order is ready for pickup.
+            </p>
+            <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">
+                Please show this order ID at the counter: <strong style="color: #11998e;">#{{ order.id }}</strong>
+            </p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>Need Help?</strong></p>
+        <p style="font-size: 14px;">
+            Contact {{ stall.name }}{% if stall.contact_phone %} at {{ stall.contact_phone }}{% endif %}
+        </p>
+        <p style="font-size: 12px; color: #999; margin-top: 20px;">
+            This is an automated email from the Campus Food Ordering System.
+        </p>
+    </div>
+</body>
+</html>

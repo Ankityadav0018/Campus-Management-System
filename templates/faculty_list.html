@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Faculty Members</h1>
+        <a href="{{ url_for('register_user') }}" class="button">Register New User as Faculty</a>
+        <a href="{{ url_for('index') }}" class="button back-button">Back to Homepage</a>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% if faculty_members %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Faculty ID</th>
+                        <th>Department</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for faculty in faculty_members %}
+                    <tr>
+                        <td>{{ faculty.user_id }}</td>
+                        <td>{{ faculty.name }}</td>
+                        <td>{{ faculty.email }}</td>
+                        <td>{{ faculty.faculty_id if faculty.faculty_id else 'N/A' }}</td>
+                        <td>{{ faculty.department if faculty.department else 'N/A' }}</td>
+                        <td>
+                            {% if faculty.faculty_id %}
+                                <a href="{{ url_for('edit_faculty_details', faculty_id=faculty.faculty_id) }}" class="button">Edit Details</a>
+                                <form action="{{ url_for('delete_faculty_details', faculty_id=faculty.faculty_id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="button back-button">Delete Details</button>
+                                </form>
+                            {% else %}
+                                <a href="{{ url_for('add_faculty_details_for_user', user_id=faculty.user_id) }}" class="button">Add Details</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No faculty members registered yet. Add one!</p>
+        {% endif %}
+    </div>
+</body>
+</html>

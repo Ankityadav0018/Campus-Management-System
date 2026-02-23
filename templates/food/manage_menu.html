@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>📋 Manage Menu - {{ stall.name }}</h2>
+    <p>Add, edit, and manage food items for this stall</p>
+</div>
+
+<div class="stats-grid" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-value">{{ food_items.count }}</div>
+        <div class="stat-label">Total Items</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ food_items|length }}</div>
+        <div class="stat-label">Available</div>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>🍽️ Menu Items</h3>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'food:add_food_item' stall.id %}" class="btn btn-primary">➕ Add Item</a>
+            <a href="{% url 'food:vendor_dashboard' %}" class="btn btn-secondary">← Dashboard</a>
+        </div>
+    </div>
+    
+    {% if items_by_category %}
+        {% for category, items in items_by_category.items %}
+        <div style="margin: 2rem 0;">
+            <h3 style="padding: 1rem; background: #f8fafc; border-left: 4px solid var(--primary-color);">
+                {{ category|title }}
+            </h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Prep Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td><strong>{{ item.name }}</strong></td>
+                        <td>{{ item.description|truncatewords:10|default:"No description" }}</td>
+                        <td>${{ item.price }}</td>
+                        <td>{{ item.preparation_time }} min</td>
+                        <td>
+                            {% if item.available %}
+                                <span class="badge badge-active">Available</span>
+                            {% else %}
+                                <span class="badge" style="background: #fee2e2; color: #991b1b;">Unavailable</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'food:edit_food_item' item.id %}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">✏️ Edit</a>
+                            <form method="POST" action="{% url 'food:delete_food_item' item.id %}" style="display: inline;" onsubmit="return confirm('Delete {{ item.name }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div style="text-align: center; padding: 3rem;">
+        <p style="font-size: 1.2rem; color: var(--text-light);">No menu items yet. Add your first item!</p>
+        <a href="{% url 'food:add_food_item' stall.id %}" class="btn btn-primary" style="margin-top: 1rem;">➕ Add First Item</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.btn-danger {
+    background: #ef4444;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.btn-danger:hover {
+    background: #dc2626;
+}
+</style>
+{% endblock %}

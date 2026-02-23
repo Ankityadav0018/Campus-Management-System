@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Student List</h1>
+        <a href="{{ url_for('add_student') }}" class="button">Register New User</a>
+        <a href="{{ url_for('students_list') }}" class="button">Manage Student Details</a>
+        <a href="{{ url_for('classrooms') }}" class="button">Manage Classrooms</a>
+        <a href="{{ url_for('schedules') }}" class="button">View Schedules</a>
+        <a href="{{ url_for('attendance') }}" class="button">Attendance Records</a>
+        <a href="{{ url_for('absentee_alerts') }}" class="button">Absentee Alerts</a>
+        <a href="{{ url_for('start_face_attendance') }}" class="button">Face Attendance</a>
+        <a href="{{ url_for('faculty_list') }}" class="button">Manage Faculty</a>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% if students %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Student ID</th>
+                        <th>Course</th>
+                        <th>Block</th>
+                        <th>Parent Contact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.user_id }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.email }}</td>
+                        <td>{{ student.student_id if student.student_id else 'N/A' }}</td>
+                        <td>{{ student.course if student.course else 'N/A' }}</td>
+                        <td>{{ student.block if student.block else 'N/A' }}</td>
+                        <td>{{ student.parent_contact if student.parent_contact else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No students found. Add one!</p>
+        {% endif %}
+    </div>
+</body>
+</html>

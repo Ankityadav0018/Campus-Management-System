@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Menu - Food Ordering{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🍽️ Campus Cafeteria Menu</h2>
+    <p>Browse our delicious selection of meals and snacks</p>
+</div>
+
+<!-- Available Items -->
+{% if available_items %}
+<div class="table-container">
+    <div class="table-header">
+        <h3>✅ Available Items</h3>
+        <a href="{% url 'food:place_order' %}" class="btn btn-primary">Place Order</a>
+    </div>
+    
+    <div class="dashboard-grid">
+        {% for item in available_items %}
+        <div class="dashboard-card">
+            <div class="card-icon">🍽️</div>
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.description|truncatewords:20 }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #f0f0f0;">
+                <span style="font-size: 1.8rem; font-weight: 700; color: var(--primary-color);">
+                    ₹{{ item.price }}
+                </span>
+                <span class="badge badge-active">Available</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="table-container" style="text-align: center;">
+    <p style="color: var(--text-light); font-size: 1.2rem;">No items available at the moment.</p>
+</div>
+{% endif %}
+
+<!-- Unavailable Items -->
+{% if unavailable_items %}
+<div class="table-container" style="margin-top: 2rem;">
+    <div class="table-header">
+        <h3>❌ Currently Unavailable</h3>
+    </div>
+    
+    <div class="dashboard-grid">
+        {% for item in unavailable_items %}
+        <div class="dashboard-card" style="opacity: 0.6;">
+            <div class="card-icon">🍽️</div>
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.description|truncatewords:20 }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #f0f0f0;">
+                <span style="font-size: 1.8rem; font-weight: 700; color: var(--text-light);">
+                    ₹{{ item.price }}
+                </span>
+                <span class="badge" style="background: #fee2e2; color: #991b1b;">Out of Stock</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin-top: 3rem;">
+    <a href="{% url 'food:food_ordering_home' %}" class="btn btn-secondary">← Back to Food Home</a>
+</div>
+{% endblock %}

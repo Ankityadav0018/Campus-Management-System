@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🏢 Block Management</h2>
+    <p>View and manage all campus buildings/blocks</p>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>🏛️ All Blocks/Buildings</h3>
+        <a href="{% url 'resources:add_block' %}" class="btn btn-primary">
+            ➕ Add New Block
+        </a>
+    </div>
+
+    {% if blocks %}
+    <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; padding: 2rem;">
+        {% for block in blocks %}
+        <div class="stat-card" style="position: relative; padding: 1.5rem; border-left: 4px solid var(--primary-color);">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                <div style="flex: 1;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏢</div>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0;">
+                        {{ block.name }}
+                    </h3>
+                </div>
+                <span class="badge badge-active" style="font-size: 0.75rem;">Active</span>
+            </div>
+
+            {% if block.description %}
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.5;">
+                {{ block.description|truncatewords:15 }}
+            </p>
+            {% else %}
+            <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 1rem; font-style: italic;">
+                No description available
+            </p>
+            {% endif %}
+
+            <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f1f5f9; border-radius: 8px;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.5rem;">🚪</span>
+                    <div>
+                        <div style="font-size: 0.75rem; color: #64748b;">Total Classrooms</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">
+                            {{ block.classroom_count }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="{% url 'resources:edit_block' block.pk %}" class="btn btn-primary" style="flex: 1; text-align: center; padding: 0.6rem; font-size: 0.875rem;">
+                    ✏️ Edit
+                </a>
+                <form method="POST" action="{% url 'resources:delete_block' block.pk %}" style="flex: 1;" onsubmit="return confirm('Are you sure you want to delete {{ block.name }}? {% if block.classroom_count > 0 %}This block has {{ block.classroom_count }} classroom(s).{% endif %}');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" style="width: 100%; padding: 0.6rem; font-size: 0.875rem; background: #ef4444; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: 600;">
+                        🗑️ Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="padding: 4rem 2rem; text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;">🏢</div>
+        <h3 style="color: #64748b; margin-bottom: 0.5rem;">No Blocks Found</h3>
+        <p style="color: #94a3b8; margin-bottom: 2rem;">Get started by adding your first building/block to the system</p>
+        <a href="{% url 'resources:add_block' %}" class="btn-login" style="display: inline-block; text-decoration: none;">
+            ➕ Add Your First Block
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Statistics Section -->
+<div class="table-container" style="margin-top: 2rem;">
+    <div class="table-header">
+        <h3>📊 Block Statistics</h3>
+    </div>
+    <div style="padding: 2rem;">
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🏢</div>
+                <div class="stat-number">{{ total_blocks }}</div>
+                <div class="stat-label">Total Blocks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🚪</div>
+                <div class="stat-number">{{ total_classrooms }}</div>
+                <div class="stat-label">Total Classrooms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-number">{{ avg_classrooms|floatformat:1 }}</div>
+                <div class="stat-label">Avg Classrooms/Block</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-number">100%</div>
+                <div class="stat-label">System Active</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-danger:hover {
+    background: #dc2626 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+</style>
+
+{% endblock %}

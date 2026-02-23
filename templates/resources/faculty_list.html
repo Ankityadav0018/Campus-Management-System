@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>👨‍🏫 Faculty Directory</h2>
+    <p>Browse all faculty members and their contact information</p>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>All Faculty Members</h3>
+    </div>
+    
+    {% if faculty %}
+    <table>
+        <thead>
+            <tr>
+                <th>Faculty ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Courses</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for member in faculty %}
+            <tr>
+                <td><strong>{{ member.faculty_id }}</strong></td>
+                <td>{{ member.name }}</td>
+                <td>{{ member.email }}</td>
+                <td>
+                    {% with courses=member.course_set.all %}
+                        {% if courses %}
+                            {% for course in courses %}
+                                {{ course.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span style="color: var(--text-light);">No courses assigned</span>
+                        {% endif %}
+                    {% endwith %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align: center; padding: 3rem;">
+        <p style="font-size: 1.2rem; color: var(--text-light);">No faculty members registered yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

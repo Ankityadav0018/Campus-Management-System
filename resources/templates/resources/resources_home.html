@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Campus Resource & Parameter Estimation</h2>
+    <p>This section will manage campus resources like blocks, classrooms, and faculty.</p>
+    <p><a href="{% url 'add_event' %}" class="form-button">Add New Event</a></p>
+    <p><a href="{% url 'suggest_classrooms' %}" class="form-button" style="background-color: #28a745;">Suggest Free Classrooms</a></p>
+    <!-- Add resource management features here -->
+{% endblock %}

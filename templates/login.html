@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - LPU Campus Management</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="user-icon">👤</div>
+                <h2>Welcome Back!</h2>
+                <p>Login to access your campus dashboard</p>
+            </div>
+
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'users:login' %}">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_username">Email Address</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📧</span>
+                        <input type="email" 
+                               id="id_username" 
+                               name="username" 
+                               placeholder="Enter your email" 
+                               required
+                               autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_password">Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" 
+                               id="id_password" 
+                               name="password" 
+                               placeholder="Enter your password" 
+                               required
+                               autocomplete="current-password">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="form-footer">
+                <p>Don't have an account? <a href="{% url 'users:register' %}">Register here</a></p>
+                <p style="margin-top: 1rem;"><a href="{% url 'home' %}">← Back to Home</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add animation to form inputs
+        document.querySelectorAll('.form-group input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.parentElement.style.transform = 'scale(1.02)';
+                this.parentElement.parentElement.style.transition = 'transform 0.3s ease';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // Add loading animation on form submit
+        document.querySelector('form').addEventListener('submit', function() {
+            const btn = document.querySelector('.btn-login');
+            btn.innerHTML = '<span class="loading"></span> Signing in...';
+            btn.disabled = true;
+        });
+    </script>
+</body>
+</html>

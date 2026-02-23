@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Student Details for {{ student.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Student Details for {{ student.name }}</h1>
+        <a href="{{ url_for('students_list') }}" class="button back-button">Back to Student List</a>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <label for="course">Course:</label>
+            <input type="text" id="course" name="course" value="{{ student.course }}" required>
+
+            <label for="block">Block:</label>
+            <input type="text" id="block" name="block" value="{{ student.block }}" required>
+
+            <label for="parent_contact">Parent Contact:</label>
+            <input type="text" id="parent_contact" name="parent_contact" value="{{ student.parent_contact }}" required>
+
+            <button type="submit">Update Details</button>
+        </form>
+    </div>
+</body>
+</html>

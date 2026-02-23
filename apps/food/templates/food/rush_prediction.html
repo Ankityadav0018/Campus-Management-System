@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Rush Hour Prediction - Food Ordering{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>📊 Rush Hour Prediction</h2>
+    <p>Analyze peak demand times to plan your orders better</p>
+</div>
+
+<div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
+    <!-- Hourly Demand -->
+    <div class="table-container">
+        <div class="table-header">
+            <h3>⏰ Hourly Demand Overview</h3>
+        </div>
+        {% if hourly_demand %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time Slot</th>
+                        <th>Total Orders</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in hourly_demand %}
+                        <tr>
+                            <td><strong>{{ entry.hour }}:00 - {{ entry.hour|add:1 }}:00</strong></td>
+                            <td>{{ entry.total_orders }}</td>
+                            <td>
+                                {% if entry.total_orders > 20 %}
+                                    <span class="badge" style="background: #fee2e2; color: #991b1b;">🔥 Very Busy</span>
+                                {% elif entry.total_orders > 10 %}
+                                    <span class="badge" style="background: #fef3c7; color: #92400e;">⚠️ Busy</span>
+                                {% else %}
+                                    <span class="badge badge-active">✓ Available</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="text-align: center; padding: 2rem; color: var(--text-light);">
+                <p>📈 No hourly demand data available yet.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Data will appear as orders are placed.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Daily Demand -->
+    <div class="table-container">
+        <div class="table-header">
+            <h3>📅 Daily Demand Overview</h3>
+        </div>
+        {% if daily_demand %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Day of Week</th>
+                        <th>Total Orders</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in daily_demand %}
+                        <tr>
+                            <td><strong>{{ entry.weekday_name }}</strong></td>
+                            <td>{{ entry.total_orders }}</td>
+                            <td>
+                                {% if entry.total_orders > 50 %}
+                                    <span class="badge" style="background: #fee2e2; color: #991b1b;">🔥 Peak Day</span>
+                                {% elif entry.total_orders > 25 %}
+                                    <span class="badge" style="background: #fef3c7; color: #92400e;">⚠️ Busy Day</span>
+                                {% else %}
+                                    <span class="badge badge-active">✓ Normal</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="text-align: center; padding: 2rem; color: var(--text-light);">
+                <p>📊 No daily demand data available yet.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Data will appear as orders are placed.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Insights -->
+<div class="welcome-section" style="margin-top: 2rem;">
+    <h3>💡 Insights & Recommendations</h3>
+    <div style="text-align: left; max-width: 800px; margin: 1.5rem auto;">
+        <ul style="list-style: none; padding: 0;">
+            <li style="padding: 0.8rem; margin-bottom: 0.8rem; background: #f0f9ff; border-left: 4px solid var(--primary-color); border-radius: 8px;">
+                <strong>🕐 Best Time to Order:</strong> Order during off-peak hours to avoid long wait times
+            </li>
+            <li style="padding: 0.8rem; margin-bottom: 0.8rem; background: #fef3c7; border-left: 4px solid var(--warning); border-radius: 8px;">
+                <strong>⏰ Peak Hours:</strong> Lunch time (12:00-14:00) typically sees the highest demand
+            </li>
+            <li style="padding: 0.8rem; margin-bottom: 0.8rem; background: #d1fae5; border-left: 4px solid var(--success); border-radius: 8px;">
+                <strong>📱 Pre-order:</strong> Place orders in advance during peak times for faster service
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{% url 'food:food_ordering_home' %}" class="btn btn-secondary">← Back to Food Home</a>
+    <a href="{% url 'food:place_order' %}" class="btn btn-primary" style="margin-left: 1rem;">Place Order Now</a>
+</div>
+{% endblock %}

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Receipt - {{ stall.name }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .order-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .order-info h2 {
+            margin-top: 0;
+            color: #667eea;
+            font-size: 20px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #64748b;
+        }
+        .info-value {
+            color: #1e293b;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .items-table th {
+            background: #f1f5f9;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+        .total-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .total-final {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 2px solid #e2e8f0;
+            font-size: 20px;
+            font-weight: bold;
+            color: #10b981;
+        }
+        .customer-section {
+            background: #fff7ed;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .customer-section h3 {
+            margin-top: 0;
+            color: #f59e0b;
+            font-size: 16px;
+        }
+        .special-instructions {
+            background: #fef3c7;
+            border-left: 4px solid #fbbf24;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+        .status-preparing {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+        .status-ready {
+            background: #d1fae5;
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>🍽️ New Order Received!</h1>
+            <p>Order #{{ order.id }}</p>
+        </div>
+        
+        <div class="content">
+            <div class="order-info">
+                <h2>Order Details</h2>
+                <div class="info-row">
+                    <span class="info-label">Order ID:</span>
+                    <span class="info-value">#{{ order.id }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Order Date:</span>
+                    <span class="info-value">{{ order.time_slot|date:"F d, Y" }} at {{ order.time_slot|time:"g:i A" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Pickup Time:</span>
+                    <span class="info-value"><strong>{{ order.pickup_time_slot }}</strong></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Payment Method:</span>
+                    <span class="info-value">{{ payment_method }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value">
+                        <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="customer-section">
+                <h3>👤 Customer Information</h3>
+                <div class="info-row">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value">{{ customer_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">{{ customer_email }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phone:</span>
+                    <span class="info-value">{{ customer_phone }}</span>
+                </div>
+            </div>
+
+            <h3 style="color: #1e293b; margin-top: 30px;">📋 Order Items</h3>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th style="text-align: center;">Qty</th>
+                        <th style="text-align: right;">Price</th>
+                        <th style="text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order_items %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.food_item.name }}</strong>
+                            {% if item.food_item.description %}
+                            <br><small style="color: #64748b;">{{ item.food_item.description|truncatewords:10 }}</small>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">{{ item.quantity }}</td>
+                        <td style="text-align: right;">₹{{ item.price_at_order }}</td>
+                        <td style="text-align: right; font-weight: 600;">₹{{ item.price_at_order|floatformat:2 }}{{ item.quantity|floatformat:0 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if order.special_instructions %}
+            <div class="special-instructions">
+                <h3 style="margin-top: 0; color: #f59e0b; font-size: 16px;">📝 Special Instructions</h3>
+                <p style="margin: 0;">{{ order.special_instructions }}</p>
+            </div>
+            {% endif %}
+
+            <div class="total-section">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span>₹{{ subtotal|floatformat:2 }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Tax (5%):</span>
+                    <span>₹{{ tax|floatformat:2 }}</span>
+                </div>
+                <div class="total-final">
+                    <span>Total Amount:</span>
+                    <span>₹{{ order.total_price|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                <strong style="color: #1e40af;">⏰ Important:</strong>
+                <p style="margin: 5px 0 0;">Please prepare this order for pickup at <strong>{{ order.pickup_time_slot }}</strong></p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>This is an automated email notification for order #{{ order.id }}</p>
+            <p>{{ stall.name }} | Campus Cafeteria Management System</p>
+            <p style="font-size: 12px; margin-top: 10px;">
+                Please do not reply to this email. For support, contact your system administrator.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Attendance Management System</h2>
+    <p>This section will handle attendance tracking for students.</p>
+    <p><a href="{% url 'add_student' %}" class="form-button">Add New Student</a></p>
+    <p><a href="{% url 'attendance_summary' %}" class="form-button" style="background-color: #28a745;">View Attendance Summary</a></p>
+    <!-- Add attendance features here -->
+{% endblock %}

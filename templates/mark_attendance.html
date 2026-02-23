@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 50%;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 35px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            color: #1a1a2e;
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 6px;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 15px;
+            color: #1a1a2e;
+        }
+
+        form select,
+        form input[type="date"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 5px;
+            border: 2px solid #007bff;
+            border-radius: 6px;
+            font-size: 15px;
+            color: #1a1a2e;
+            background-color: #f8f9ff;
+            box-sizing: border-box;
+            appearance: auto;
+        }
+
+        form select:focus,
+        form input[type="date"]:focus {
+            outline: none;
+            border-color: #0056b3;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+        }
+
+        form button[type="submit"] {
+            width: 100%;
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+        }
+
+        form button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .back-button {
+            display: inline-block;
+            background-color: #6c757d;
+            color: #ffffff;
+            padding: 9px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+
+        .flashes {
+            list-style-type: none;
+            padding: 12px 16px;
+            margin: 15px 0;
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            color: #856404;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .flashes li {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mark Attendance</h1>
+        <a href="{{ url_for('attendance') }}" class="back-button">← Back to Attendance Records</a>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <label for="student_id">Student:</label>
+            <select id="student_id" name="student_id" required>
+                <option value="">-- Select a Student --</option>
+                {% for student in students %}
+                    <option value="{{ student.student_id }}">{{ student.name }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="status">Status:</label>
+            <select id="status" name="status" required>
+                <option value="present">Present</option>
+                <option value="absent">Absent</option>
+            </select>
+
+            <button type="submit">Mark Attendance</button>
+        </form>
+    </div>
+</body>
+</html>

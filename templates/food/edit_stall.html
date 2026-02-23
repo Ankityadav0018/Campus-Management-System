@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>✏️ Edit: {{ stall.name }}</h2>
+    <p>Update stall information</p>
+</div>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="user-icon">🏪</div>
+            <h2>Edit Stall</h2>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">Stall Name *</label>
+                {{ form.name }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label for="{{ form.opening_time.id_for_label }}">Opening Time</label>
+                    {{ form.opening_time }}
+                </div>
+                <div>
+                    <label for="{{ form.closing_time.id_for_label }}">Closing Time</label>
+                    {{ form.closing_time }}
+                </div>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                {{ form.is_active }}
+                <label for="{{ form.is_active.id_for_label }}" style="margin: 0;">Active</label>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn-login" style="flex: 1;">Update Stall</button>
+                <a href="{% url 'food:vendor_dashboard' %}" class="btn btn-secondary" style="flex: 1; padding: 0.9rem; text-align: center; text-decoration: none;">Cancel</a>
+            </div>
+        </form>
+
+        <form method="POST" action="{% url 'food:delete_stall' stall.id %}" style="margin-top: 2rem;" onsubmit="return confirm('Are you sure? This will delete all menu items too!');">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger" style="width: 100%; padding: 0.9rem;">🗑️ Delete Stall</button>
+        </form>
+
+        <div class="form-footer">
+            <a href="{% url 'food:vendor_dashboard' %}">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-danger {
+    background: #ef4444;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 1rem;
+}
+.btn-danger:hover {
+    background: #dc2626;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Remedial Attendance Records</h2>
+    <p><a href="{% url 'remedial:mark_remedial_attendance' %}" class="form-button">Mark Remedial Attendance</a></p>
+    <p><a href="{% url 'remedial:remedial_home' %}" class="form-button" style="background-color: #6c757d;">Back to Remedial Classes Home</a></p>
+
+    {% if remedial_attendance_records %}
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>Remedial Class</th>
+                    <th>Student</th>
+                    <th>Attended</th>
+                    <th>Date Recorded</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in remedial_attendance_records %}
+                <tr>
+                    <td>{{ record.remedial_class.course.name }} ({{ record.remedial_class.date }})</td>
+                    <td>{{ record.student.name }}</td>
+                    <td>{{ record.attended|yesno:"Yes,No" }}</td>
+                    <td>{{ record.date_recorded }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No remedial attendance records found.</p>
+    {% endif %}
+{% endblock %}

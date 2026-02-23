@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>📋 My Orders</h2>
+    <p>View your order history and track current orders</p>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>Order History</h3>
+        <a href="{% url 'food:place_order' %}" class="btn btn-primary">Place New Order</a>
+    </div>
+    
+    {% if orders %}
+    <table>
+        <thead>
+            <tr>
+                <th>Order #</th>
+                <th>Student</th>
+                <th>Order Time</th>
+                <th>Pickup Time</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                <th>Items</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td><strong>#{{ order.id }}</strong></td>
+                <td>{{ order.student.name }}</td>
+                <td>{{ order.time_slot|date:"M d, Y h:i A" }}</td>
+                <td>{{ order.pickup_time_slot }}</td>
+                <td><strong>${{ order.total_price }}</strong></td>
+                <td>
+                    {% if order.status == 'pending' %}
+                        <span class="badge" style="background: #fef3c7; color: #92400e;">Pending</span>
+                    {% elif order.status == 'preparing' %}
+                        <span class="badge" style="background: #dbeafe; color: #1e40af;">Preparing</span>
+                    {% elif order.status == 'ready' %}
+                        <span class="badge badge-active">Ready for Pickup</span>
+                    {% elif order.status == 'completed' %}
+                        <span class="badge badge-student">Completed</span>
+                    {% else %}
+                        <span class="badge" style="background: #fee2e2; color: #991b1b;">{{ order.status|title }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% for item in order.foodorderitem_set.all %}
+                        {{ item.quantity }}x {{ item.food_item.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align: center; padding: 3rem;">
+        <p style="font-size: 1.2rem; color: var(--text-light);">You haven't placed any orders yet.</p>
+        <a href="{% url 'food:place_order' %}" class="btn btn-primary" style="margin-top: 1rem;">Place Your First Order</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

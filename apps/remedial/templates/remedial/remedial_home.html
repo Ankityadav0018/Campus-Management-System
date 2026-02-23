@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Remedial Classes{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🎯 Remedial Class Management</h2>
+    <p>Schedule and track make-up classes for students</p>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <div class="card-icon">➕</div>
+        <h3>Add Remedial Class</h3>
+        <p>Schedule a new make-up class for students</p>
+        <a href="{% url 'remedial:add_remedial_class' %}" class="card-action">Schedule Class →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <h3>Remedial Attendance</h3>
+        <p>View and manage attendance for remedial classes</p>
+        <a href="{% url 'remedial:remedial_attendance_list' %}" class="card-action">View Attendance →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📊</div>
+        <h3>Class Schedule</h3>
+        <p>View all scheduled remedial classes</p>
+        <a href="{% url 'remedial:remedial_attendance_list' %}" class="card-action">View Schedule →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">👨‍🎓</div>
+        <h3>Student Progress</h3>
+        <p>Track student participation in remedial classes</p>
+        <a href="{% url 'remedial:remedial_attendance_list' %}" class="card-action">View Progress →</a>
+    </div>
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{% url 'home' %}" class="btn btn-secondary">← Back to Home</a>
+</div>
+{% endblock %}

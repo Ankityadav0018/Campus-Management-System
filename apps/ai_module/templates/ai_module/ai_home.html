@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>AI Module</h2>
+    <p>Face recognition attendance, rush prediction, and absentee alert.</p>
+    <p><a href="{% url 'ai_module:start_face_attendance' %}" class="form-button">Face Recognition Attendance</a></p>
+    <p><a href="{% url 'ai_module:absentee_alert' %}" class="form-button" style="background-color: #e74c3c;">Absentee Alert</a></p>
+    <p><a href="{% url 'food:rush_prediction' %}" class="form-button" style="background-color: #f39c12;">Rush Hour Prediction</a></p>
+{% endblock %}

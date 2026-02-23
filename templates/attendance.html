@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Records</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Attendance Records</h1>
+        <a href="{{ url_for('mark_attendance') }}" class="button">Mark Attendance</a>
+        <a href="{{ url_for('index') }}" class="button back-button">Back to Students</a>
+        <a href="{{ url_for('schedules') }}" class="button back-button">View Schedules</a>
+        <a href="{{ url_for('classrooms') }}" class="button back-button">Manage Classrooms</a>
+        <a href="{{ url_for('absentee_alerts') }}" class="button">Absentee Alerts</a>
+        <a href="{{ url_for('students_list') }}" class="button">Manage Student Details</a>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% if attendance_records %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance_records %}
+                    <tr>
+                        <td>{{ record.student_name }}</td>
+                        <td>{{ record.date }}</td>
+                        <td>{{ record.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No attendance records found. Mark some!</p>
+        {% endif %}
+    </div>
+</body>
+</html>

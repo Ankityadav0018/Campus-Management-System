@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>📚 Add New Course</h2>
+    <p>Register a new course in the campus management system</p>
+</div>
+
+<div class="login-container" style="max-width: 700px;">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="user-icon">📖</div>
+            <h2>Course Registration Form</h2>
+            <p>Fill in the details below to add a new course</p>
+        </div>
+
+        <form method="POST" id="courseForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.course_id.id_for_label }}">
+                    <strong>{{ form.course_id.label }}</strong>
+                    <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form.course_id }}
+                {% if form.course_id.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {{ form.course_id.errors }}
+                    </div>
+                {% endif %}
+                <small style="color: #64748b; font-size: 0.875rem;">
+                    Enter a unique course code (e.g., CS101, MATH201, ENG301)
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">
+                    <strong>{{ form.name.label }}</strong>
+                    <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {{ form.name.errors }}
+                    </div>
+                {% endif %}
+                <small style="color: #64748b; font-size: 0.875rem;">
+                    Full name of the course
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.assigned_faculty.id_for_label }}">
+                    <strong>{{ form.assigned_faculty.label }}</strong>
+                </label>
+                {{ form.assigned_faculty }}
+                {% if form.assigned_faculty.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {{ form.assigned_faculty.errors }}
+                    </div>
+                {% endif %}
+                <small style="color: #64748b; font-size: 0.875rem;">
+                    Select the faculty member teaching this course (optional)
+                </small>
+            </div>
+
+            <div class="alert alert-info" style="background: #dbeafe; color: #1e40af; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <strong>📋 Quick Tips:</strong>
+                <ul style="margin: 0.5rem 0 0 1.5rem; font-size: 0.9rem;">
+                    <li>Course codes must be unique across the system</li>
+                    <li>Use standard naming conventions for course codes</li>
+                    <li>You can assign faculty later if not available now</li>
+                    <li>All fields marked with * are required</li>
+                </ul>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn-login" style="flex: 1;">
+                    ✅ Add Course
+                </button>
+                <a href="{% url 'resources:course_list' %}" class="btn-login" style="flex: 1; background: #6b7280; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                    ❌ Cancel
+                </a>
+            </div>
+        </form>
+
+        <div class="form-footer">
+            <a href="{% url 'resources:resources_home' %}">← Back to Resources</a>
+        </div>
+    </div>
+</div>
+
+<!-- Course Preview Card -->
+<div class="table-container" style="margin-top: 2rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+    <div class="table-header">
+        <h3>📚 Course Management Features</h3>
+    </div>
+    <div style="padding: 2rem;">
+        <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎯</div>
+                <h4>Course Tracking</h4>
+                <p>Monitor all courses and their assignments</p>
+            </div>
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">👨‍🏫</div>
+                <h4>Faculty Assignment</h4>
+                <p>Link courses with teaching faculty</p>
+            </div>
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
+                <h4>Easy Management</h4>
+                <p>Edit and update course details anytime</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control {
+    width: 100%;
+    padding: 0.9rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+select.form-control {
+    cursor: pointer;
+    background-color: #ffffff;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+</style>
+
+<script>
+// Auto-uppercase course code
+const courseIdField = document.getElementById('{{ form.course_id.id_for_label }}');
+if (courseIdField) {
+    courseIdField.addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase();
+    });
+}
+
+// Simple form validation without blocking submission
+const courseForm = document.getElementById('courseForm');
+if (courseForm) {
+    courseForm.addEventListener('submit', function(e) {
+        const courseId = document.getElementById('{{ form.course_id.id_for_label }}').value.trim();
+        const courseName = document.getElementById('{{ form.name.id_for_label }}').value.trim();
+        
+        if (!courseId || !courseName) {
+            e.preventDefault();
+            alert('Please fill in all required fields (Course Code and Course Name)');
+            return false;
+        }
+        
+        // Validate course code format (alphanumeric)
+        const courseCodePattern = /^[A-Z0-9]+$/i;
+        if (!courseCodePattern.test(courseId)) {
+            e.preventDefault();
+            alert('Course Code should contain only letters and numbers (e.g., CS101)');
+            return false;
+        }
+        
+        // If validation passes, allow form to submit normally
+        console.log('Form validation passed, submitting...');
+    });
+}
+</script>
+{% endblock %}

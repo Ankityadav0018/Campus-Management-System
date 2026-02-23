@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🏢 Add New Block</h2>
+    <p>Register a new building/block in the campus infrastructure</p>
+</div>
+
+<div class="login-container" style="max-width: 700px;">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="user-icon">🏛️</div>
+            <h2>Block Registration Form</h2>
+            <p>Fill in the building/block details below</p>
+        </div>
+
+        <form method="POST" id="blockForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">
+                    <strong>{{ form.name.label }}</strong>
+                    <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {{ form.name.errors }}
+                    </div>
+                {% endif %}
+                <small style="color: #64748b; font-size: 0.875rem;">
+                    Enter the building/block name (e.g., Block A, Engineering Building, Main Block)
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">
+                    <strong>{{ form.description.label }}</strong>
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {{ form.description.errors }}
+                    </div>
+                {% endif %}
+                <small style="color: #64748b; font-size: 0.875rem;">
+                    Optional: Add a brief description about this block (location, departments, etc.)
+                </small>
+            </div>
+
+            <div class="alert alert-info" style="background: #dbeafe; color: #1e40af; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <strong>💡 Guidelines:</strong>
+                <ul style="margin: 0.5rem 0 0 1.5rem; font-size: 0.9rem;">
+                    <li>Block names must be unique across the campus</li>
+                    <li>Use clear, descriptive names for easy identification</li>
+                    <li>After creating a block, you can add classrooms to it</li>
+                    <li>Description helps identify the block's purpose or location</li>
+                </ul>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn-login" style="flex: 1;">
+                    ✅ Add Block
+                </button>
+                <a href="{% url 'resources:block_list' %}" class="btn-login" style="flex: 1; background: #6b7280; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                    ❌ Cancel
+                </a>
+            </div>
+        </form>
+
+        <div class="form-footer">
+            <a href="{% url 'resources:resources_home' %}">← Back to Resources</a>
+        </div>
+    </div>
+</div>
+
+<!-- Information Cards -->
+<div class="table-container" style="margin-top: 2rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+    <div class="table-header">
+        <h3>🏗️ Block Management Benefits</h3>
+    </div>
+    <div style="padding: 2rem;">
+        <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🗂️</div>
+                <h4>Organized Structure</h4>
+                <p>Group classrooms by building for better organization</p>
+            </div>
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔍</div>
+                <h4>Easy Navigation</h4>
+                <p>Quickly locate classrooms within specific blocks</p>
+            </div>
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
+                <h4>Resource Tracking</h4>
+                <p>Monitor classroom distribution across campus</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control {
+    width: 100%;
+    padding: 0.9rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+</style>
+
+<script>
+// Form validation
+document.getElementById('blockForm').addEventListener('submit', function(e) {
+    const blockName = document.getElementById('{{ form.name.id_for_label }}').value.trim();
+    
+    if (!blockName) {
+        e.preventDefault();
+        alert('Please enter a block/building name');
+        return false;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Vendor Dashboard{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🍽️ Welcome, {{ user.get_full_name|default:user.email }}!</h2>
+    <p>Food Vendor Dashboard - Manage Orders</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ pending_count }}</div>
+        <div class="stat-label">⏳ Pending Orders</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ preparing_count }}</div>
+        <div class="stat-label">👨‍🍳 Preparing</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ ready_count }}</div>
+        <div class="stat-label">✅ Ready for Pickup</div>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>📋 Recent Orders</h3>
+    </div>
+    
+    {% if all_orders %}
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Student</th>
+                <th>Time</th>
+                <th>Pickup Slot</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in all_orders %}
+            <tr>
+                <td><strong>#{{ order.id }}</strong></td>
+                <td>{{ order.student.name }}</td>
+                <td>{{ order.time_slot|date:"M d, Y H:i" }}</td>
+                <td>{{ order.pickup_time_slot }}</td>
+                <td><strong>₹{{ order.total_price }}</strong></td>
+                <td>
+                    <span class="badge 
+                        {% if order.status == 'pending' %}badge-warning
+                        {% elif order.status == 'preparing' %}badge-info
+                        {% elif order.status == 'ready' %}badge-success
+                        {% elif order.status == 'completed' %}badge-active
+                        {% else %}badge-danger{% endif %}">
+                        {{ order.status|title }}
+                    </span>
+                </td>
+                <td>
+                    <form method="post" action="{% url 'food:update_order_status' order.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <select name="status" onchange="this.form.submit()" style="padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>Preparing</option>
+                            <option value="ready" {% if order.status == 'ready' %}selected{% endif %}>Ready</option>
+                            <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="padding: 2rem; text-align: center; color: var(--text-light);">
+        <p>No orders yet</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+.badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+.badge-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+</style>
+{% endblock %}

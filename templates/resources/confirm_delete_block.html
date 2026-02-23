@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>⚠️ Confirm Delete</h2>
+    <p>Are you sure you want to delete this block?</p>
+</div>
+
+<div class="login-container" style="max-width: 600px;">
+    <div class="login-card">
+        <div class="login-header" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+            <div class="user-icon" style="background: rgba(255, 255, 255, 0.2);">⚠️</div>
+            <h2 style="color: white;">Delete Block</h2>
+            <p style="color: rgba(255, 255, 255, 0.9);">This action cannot be undone</p>
+        </div>
+
+        <div style="padding: 2rem;">
+            <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                <h3 style="color: #991b1b; margin: 0 0 0.5rem 0; font-size: 1.1rem;">
+                    🏢 {{ block.name }}
+                </h3>
+                {% if block.description %}
+                <p style="color: #7f1d1d; margin: 0; font-size: 0.9rem;">
+                    {{ block.description }}
+                </p>
+                {% endif %}
+            </div>
+
+            {% if block.campusclassroom_set.count > 0 %}
+            <div class="alert alert-info" style="background: #fef3c7; border-left: 4px solid #f59e0b; color: #78350f; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <strong>⚠️ Warning:</strong>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                    This block has <strong>{{ block.campusclassroom_set.count }}</strong> classroom(s) associated with it.
+                    You cannot delete this block until all classrooms are removed or reassigned.
+                </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="{% url 'resources:block_list' %}" class="btn-login" style="display: inline-block; text-decoration: none; background: #3b82f6;">
+                    ← Back to Block List
+                </a>
+            </div>
+            {% else %}
+            <div class="alert alert-info" style="background: #dbeafe; color: #1e40af; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <strong>ℹ️ Information:</strong>
+                <ul style="margin: 0.5rem 0 0 1.5rem; font-size: 0.9rem;">
+                    <li>This block has no classrooms assigned to it</li>
+                    <li>Deleting this block is safe and will not affect other data</li>
+                    <li>This action cannot be undone</li>
+                </ul>
+            </div>
+
+            <form method="POST" style="margin-top: 2rem;">
+                {% csrf_token %}
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn-login" style="flex: 1; background: #ef4444;">
+                        🗑️ Yes, Delete Block
+                    </button>
+                    <a href="{% url 'resources:block_list' %}" class="btn-login" style="flex: 1; background: #6b7280; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                        ❌ Cancel
+                    </a>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>⚠️ Low Attendance Alerts</h2>
+    <p>Students with attendance below 75% threshold</p>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>At-Risk Students</h3>
+    </div>
+    
+    {% if low_attendance_students %}
+    <table>
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Total Classes</th>
+                <th>Present</th>
+                <th>Attendance %</th>
+                <th>Classes Needed</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student_data in low_attendance_students %}
+            <tr style="background: #fef2f2;">
+                <td><strong>{{ student_data.student.student_id }}</strong></td>
+                <td>{{ student_data.student.name }}</td>
+                <td>{{ student_data.student.email }}</td>
+                <td>{{ student_data.total_classes }}</td>
+                <td>{{ student_data.present_classes }}</td>
+                <td>
+                    <span style="color: #dc2626; font-weight: bold;">{{ student_data.attendance_percentage }}%</span>
+                </td>
+                <td>
+                    <span class="badge" style="background: #fef2f2; color: #991b1b;">
+                        {{ student_data.classes_needed }} more classes needed
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align: center; padding: 3rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+        <p style="font-size: 1.2rem; color: var(--text-light);">Great news! All students have attendance above 75%</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .success-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .order-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #64748b;
+        }
+        .info-value {
+            color: #1e293b;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .items-table th {
+            background: #f1f5f9;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .total-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .total-final {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 2px solid #e2e8f0;
+            font-size: 20px;
+            font-weight: bold;
+            color: #10b981;
+        }
+        .highlight-box {
+            background: #dcfce7;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="success-icon">✅</div>
+            <h1>Order Confirmed!</h1>
+            <p>Thank you for your order, {{ customer_name }}</p>
+        </div>
+        
+        <div class="content">
+            <p>Hi {{ customer_name }},</p>
+            <p>Your food order has been confirmed and sent to <strong>{{ stall.name }}</strong>. We're preparing your delicious meal!</p>
+
+            <div class="order-info">
+                <h2 style="margin-top: 0; color: #10b981;">Order Summary</h2>
+                <div class="info-row">
+                    <span class="info-label">Order ID:</span>
+                    <span class="info-value"><strong>#{{ order.id }}</strong></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Stall:</span>
+                    <span class="info-value">{{ stall.name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Order Time:</span>
+                    <span class="info-value">{{ order.time_slot|date:"F d, Y" }} at {{ order.time_slot|time:"g:i A" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Pickup Time:</span>
+                    <span class="info-value"><strong>{{ order.pickup_time_slot }}</strong></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Payment Method:</span>
+                    <span class="info-value">{{ payment_method }}</span>
+                </div>
+            </div>
+
+            <h3 style="color: #1e293b;">Your Items</h3>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th style="text-align: center;">Qty</th>
+                        <th style="text-align: right;">Price</th>
+                        <th style="text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order_items %}
+                    <tr>
+                        <td><strong>{{ item.food_item.name }}</strong></td>
+                        <td style="text-align: center;">{{ item.quantity }}</td>
+                        <td style="text-align: right;">₹{{ item.price_at_order }}</td>
+                        <td style="text-align: right; font-weight: 600;">₹{{ item.price_at_order|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="total-section">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>Subtotal:</span>
+                    <span>₹{{ subtotal|floatformat:2 }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>Tax (5%):</span>
+                    <span>₹{{ tax|floatformat:2 }}</span>
+                </div>
+                <div class="total-final">
+                    <span>Total Amount:</span>
+                    <span>₹{{ order.total_price|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <strong>⏰ Pickup Instructions:</strong>
+                <p style="margin: 5px 0 0;">Please arrive at <strong>{{ stall.name }}</strong> at <strong>{{ order.pickup_time_slot }}</strong> to collect your order.</p>
+            </div>
+
+            <p style="text-align: center; color: #64748b; margin-top: 30px;">
+                Questions about your order? Contact {{ stall.name }}<br>
+                {% if stall.email %}Email: {{ stall.email }}{% endif %}
+                {% if stall.contact_phone %} | Phone: {{ stall.contact_phone }}{% endif %}
+            </p>
+        </div>
+
+        <div class="footer">
+            <p><strong>Campus Cafeteria Management System</strong></p>
+            <p style="font-size: 12px; margin-top: 10px;">
+                This is an automated confirmation email. Please do not reply.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

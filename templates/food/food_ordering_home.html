@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Food Ordering System{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🍽️ Food Ordering System</h2>
+    <p>Order delicious meals from the campus cafeteria</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ total_items|default:"0" }}</div>
+        <div class="stat-label">Menu Items</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_orders|default:"0" }}</div>
+        <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ pending_orders|default:"0" }}</div>
+        <div class="stat-label">Pending Orders</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">${{ total_revenue|default:"0" }}</div>
+        <div class="stat-label">Total Revenue</div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <div class="card-icon">🛒</div>
+        <h3>Place Order</h3>
+        <p>Order food for pickup at your preferred time</p>
+        <a href="{% url 'food:place_order' %}" class="card-action">Order Now →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <h3>My Orders</h3>
+        <p>View your order history and current orders</p>
+        <a href="{% url 'food:my_orders' %}" class="card-action">View Orders →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📊</div>
+        <h3>Rush Prediction</h3>
+        <p>See peak hours and plan your orders</p>
+        <a href="{% url 'food:rush_prediction' %}" class="card-action">View Analytics →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">🍕</div>
+        <h3>Menu</h3>
+        <p>Browse all available food items</p>
+        <a href="{% url 'food:menu' %}" class="card-action">View Menu →</a>
+    </div>
+</div>
+
+{% if food_items %}
+<div class="table-container" style="margin-top: 3rem;">
+    <div class="table-header">
+        <h3>🔥 Today's Special Menu</h3>
+        <a href="{% url 'food:menu' %}" class="btn btn-primary">View Full Menu</a>
+    </div>
+    <div class="dashboard-grid">
+        {% for item in food_items %}
+        <div class="dashboard-card">
+            <div class="card-icon">🍽️</div>
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.description|truncatewords:15 }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                <span style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">${{ item.price }}</span>
+                {% if item.available %}
+                    <span class="badge badge-active">Available</span>
+                {% else %}
+                    <span class="badge" style="background: #fee2e2; color: #991b1b;">Out of Stock</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="table-container" style="margin-top: 3rem; text-align: center; padding: 3rem;">
+    <div style="font-size: 4rem; margin-bottom: 1rem;">🍽️</div>
+    <p style="font-size: 1.2rem; color: var(--text-light);">No menu items available at the moment.</p>
+    <p style="color: var(--text-light); margin-top: 1rem;">Check back later for delicious options!</p>
+</div>
+{% endif %}
+{% endblock %}

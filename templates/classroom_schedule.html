@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule for {{ classroom.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Schedule for {{ classroom.name }}</h1>
+        <a href="{{ url_for('schedules') }}" class="button back-button">Back to All Schedules</a>
+        <a href="{{ url_for('classrooms') }}" class="button back-button">Manage Classrooms</a>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% if schedules %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Course Name</th>
+                        <th>Faculty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for schedule in schedules %}
+                    <tr>
+                        <td>{{ schedule.day_of_week }}</td>
+                        <td>{{ schedule.start_time }}</td>
+                        <td>{{ schedule.end_time }}</td>
+                        <td>{{ schedule.course_name if schedule.course_name else 'N/A' }}</td>
+                        <td>{{ schedule.faculty_name if schedule.faculty_name else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No schedules found for {{ classroom.name }}.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

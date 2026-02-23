@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🎯 Remedial Classes Management</h2>
+    <p>Schedule and manage make-up classes for students</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ total_classes|default:"0" }}</div>
+        <div class="stat-label">Total Remedial Classes</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ upcoming_classes|default:"0" }}</div>
+        <div class="stat-label">Upcoming Classes</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_attendance|default:"0" }}</div>
+        <div class="stat-label">Total Attendance</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ unique_students|default:"0" }}</div>
+        <div class="stat-label">Students Enrolled</div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <div class="card-icon">➕</div>
+        <h3>Schedule Class</h3>
+        <p>Create a new remedial class session</p>
+        <a href="{% url 'remedial:add_remedial_class' %}" class="card-action">Schedule Now →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <h3>All Classes</h3>
+        <p>View all scheduled remedial classes</p>
+        <a href="{% url 'remedial:remedial_home' %}" class="card-action">View All →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">✓</div>
+        <h3>Mark Attendance</h3>
+        <p>Mark attendance for remedial classes</p>
+        <a href="{% url 'remedial:mark_remedial_attendance' %}" class="card-action">Mark Now →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📊</div>
+        <h3>Attendance Report</h3>
+        <p>View attendance records and statistics</p>
+        <a href="{% url 'remedial:remedial_attendance_list' %}" class="card-action">View Report →</a>
+    </div>
+</div>
+
+<div class="table-container" style="margin-top: 3rem;">
+    <div class="table-header">
+        <h3>Scheduled Remedial Classes</h3>
+        <a href="{% url 'remedial:add_remedial_class' %}" class="btn btn-primary">Add New Class</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Faculty</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Room</th>
+                <th>Code</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for class in remedial_classes %}
+            <tr>
+                <td><strong>{{ class.course.name }}</strong></td>
+                <td>{{ class.faculty.name }}</td>
+                <td>{{ class.date|date:"M d, Y" }}</td>
+                <td>{{ class.start_time }} - {{ class.end_time }}</td>
+                <td>{{ class.room|default:"TBA" }}</td>
+                <td><span class="badge badge-student">{{ class.remedial_code }}</span></td>
+                <td>
+                    <a href="{% url 'remedial:edit_remedial_class' class.pk %}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Edit</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 2rem;">No remedial classes scheduled yet. Create one to get started!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

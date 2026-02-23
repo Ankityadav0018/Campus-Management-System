@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absentee Alerts</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Absentee Alerts</h1>
+        <a href="{{ url_for('attendance') }}" class="button back-button">Back to Attendance Records</a>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% if risky_students %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Attendance Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in risky_students %}
+                    <tr>
+                        <td>{{ student.name }}</td>
+                        <td>{{ "%.2f"|format(student.attendance_percentage) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No risky students found based on current attendance records.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

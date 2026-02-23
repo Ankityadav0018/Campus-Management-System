@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Order Receipt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            background: #fff;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+        }
+        .order-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .order-info p {
+            margin: 8px 0;
+        }
+        .order-info strong {
+            color: #667eea;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+        .items-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+        .items-table .item-name {
+            font-weight: 600;
+            color: #333;
+        }
+        .items-table .item-price {
+            text-align: right;
+        }
+        .total-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 16px;
+        }
+        .total-row.grand-total {
+            border-top: 2px solid #667eea;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-weight: bold;
+            font-size: 20px;
+            color: #667eea;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            color: #666;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #ffa726;
+            color: white;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍽️ New Order Received!</h1>
+        <p style="margin: 10px 0 0 0; font-size: 16px;">{{ stall.name }}</p>
+    </div>
+    
+    <div class="content">
+        <div class="order-info">
+            <h2 style="margin-top: 0; color: #667eea;">Order Details</h2>
+            <p><strong>Order ID:</strong> #{{ order.id }}</p>
+            <p><strong>Customer:</strong> {{ customer_name }}</p>
+            <p><strong>Customer Email:</strong> {{ customer_email }}</p>
+            <p><strong>Order Time:</strong> {{ order.time_slot|date:"F d, Y H:i" }}</p>
+            <p><strong>Pickup Time:</strong> {{ order.pickup_time_slot }}</p>
+            <p><strong>Payment Method:</strong> {{ payment_method }}</p>
+            <p><strong>Status:</strong> <span class="status-badge">{{ order.get_status_display }}</span></p>
+            {% if order.special_instructions %}
+            <p><strong>Special Instructions:</strong><br>{{ order.special_instructions }}</p>
+            {% endif %}
+        </div>
+
+        <h3 style="color: #667eea;">Order Items</h3>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th style="text-align: center;">Quantity</th>
+                    <th style="text-align: right;">Price</th>
+                    <th style="text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order_items %}
+                <tr>
+                    <td class="item-name">{{ item.food_item.name }}</td>
+                    <td style="text-align: center;">{{ item.quantity }}</td>
+                    <td class="item-price">₹{{ item.price_at_order }}</td>
+                    <td class="item-price">₹{{ item.price_at_order|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total-section">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span>₹{{ subtotal|floatformat:2 }}</span>
+            </div>
+            <div class="total-row">
+                <span>Tax (5%):</span>
+                <span>₹{{ tax|floatformat:2 }}</span>
+            </div>
+            <div class="total-row grand-total">
+                <span>Grand Total:</span>
+                <span>₹{{ order.total_price }}</span>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <p style="margin-top: 30px; color: #666;">
+                Please prepare this order and have it ready by the pickup time.
+            </p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>This is an automated email from the Campus Food Ordering System.</p>
+        <p style="font-size: 12px; color: #999;">
+            If you have any questions, please contact support.
+        </p>
+    </div>
+</body>
+</html>

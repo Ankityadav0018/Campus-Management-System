@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}All Students - Faculty View{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>👥 Student Database</h2>
+    <p>Faculty Access - View All Students</p>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>📋 All Registered Students</h3>
+        <a href="{% url 'users:faculty_home' %}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+    
+    {% if students %}
+    <div style="margin-bottom: 1rem;">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search students by name, ID, or email...">
+    </div>
+    
+    <table id="studentsTable">
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Course</th>
+                <th>Block</th>
+                <th>Parent Contact</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td><strong>{{ student.student_id }}</strong></td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.user.email|default:"N/A" }}</td>
+                <td>{{ student.course }}</td>
+                <td>{{ student.block }}</td>
+                <td>{{ student.parent_contact|default:"N/A" }}</td>
+                <td><span class="badge badge-active">Active</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="padding: 2rem; text-align: center; color: var(--text-light);">
+        <p>No students found</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Real-time search functionality
+const searchInput = document.getElementById('searchInput');
+const table = document.getElementById('studentsTable');
+
+if (searchInput && table) {
+    searchInput.addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const text = row.textContent.toLowerCase();
+            
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

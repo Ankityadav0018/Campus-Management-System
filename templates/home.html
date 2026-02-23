@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if user.is_authenticated and user.role == 'student' %}
+    <!-- Student Dashboard -->
+    <div class="welcome-section">
+        <h2>👋 Welcome Back, {{ student.name|default:user.username }}!</h2>
+        <p>Your personalized student dashboard</p>
+    </div>
+
+    <!-- Quick Stats for Students -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-value">{{ total_classes }}</div>
+            <div class="stat-label">Total Classes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-value">{{ attendance_percentage }}%</div>
+            <div class="stat-label">Attendance Rate</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🍽️</div>
+            <div class="stat-value">{{ total_orders }}</div>
+            <div class="stat-label">Food Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">{% if has_face %}✓{% else %}⚠️{% endif %}</div>
+            <div class="stat-value">{% if has_face %}Active{% else %}Pending{% endif %}</div>
+            <div class="stat-label">Face Registration</div>
+        </div>
+    </div>
+
+    <!-- Student Quick Actions -->
+    <div class="dashboard-grid" style="margin-top: 2rem;">
+        <div class="dashboard-card">
+            <div class="card-icon">📊</div>
+            <h3>My Attendance</h3>
+            <p>View your attendance records and statistics</p>
+            <a href="{% url 'attendance:attendance_home' %}" class="card-action">View Details →</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">🎥</div>
+            <h3>Register Face</h3>
+            <p>Register your face for AI-powered attendance</p>
+            {% if has_face %}
+                <span class="badge badge-active" style="display: inline-block; margin-top: 1rem;">✓ Already Registered</span>
+            {% else %}
+                <a href="{% url 'attendance:register_face' %}" class="card-action">Register Now →</a>
+            {% endif %}
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">🍽️</div>
+            <h3>Food Ordering</h3>
+            <p>Order meals from campus cafeteria</p>
+            <a href="{% url 'food:food_ordering_home' %}" class="card-action">Order Food →</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">📜</div>
+            <h3>Order History</h3>
+            <p>View your past food orders and transactions</p>
+            <a href="{% url 'food:order_history' %}" class="card-action">View History →</a>
+        </div>
+    </div>
+
+    <!-- Recent Attendance -->
+    <div class="table-container" style="margin-top: 2rem;">
+        <div class="table-header">
+            <h3>📅 Recent Attendance</h3>
+            <a href="{% url 'attendance:attendance_summary' %}" class="btn btn-primary">View All</a>
+        </div>
+        <div style="padding: 0;">
+            {% if recent_attendance %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f8fafc;">
+                    <tr>
+                        <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Date</th>
+                        <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Course</th>
+                        <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Faculty</th>
+                        <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Time</th>
+                        <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #e2e8f0;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in recent_attendance %}
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 1rem;">{{ record.class_date|date:"M d, Y" }}</td>
+                        <td style="padding: 1rem;">{{ record.course.name|default:"N/A" }}</td>
+                        <td style="padding: 1rem;">{{ record.faculty.name }}</td>
+                        <td style="padding: 1rem;">{{ record.class_time|default:"N/A" }}</td>
+                        <td style="padding: 1rem; text-align: center;">
+                            {% if record.status == 'present' %}
+                                <span class="badge badge-active">✓ Present</span>
+                            {% else %}
+                                <span class="badge" style="background: #ef4444;">✗ Absent</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="padding: 3rem; text-align: center; color: #94a3b8;">
+                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">📅</div>
+                <p>No attendance records yet</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Food Orders -->
+    <div class="table-container" style="margin-top: 2rem;">
+        <div class="table-header">
+            <h3>🍽️ Recent Food Orders</h3>
+            <a href="{% url 'food:order_history' %}" class="btn btn-primary">View All</a>
+        </div>
+        <div style="padding: 0;">
+            {% if recent_orders %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f8fafc;">
+                    <tr>
+                        <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Order Date</th>
+                        <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Item</th>
+                        <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #e2e8f0;">Quantity</th>
+                        <th style="padding: 1rem; text-align: right; border-bottom: 2px solid #e2e8f0;">Total Price</th>
+                        <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #e2e8f0;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 1rem;">{{ order.order_date|date:"M d, Y H:i" }}</td>
+                        <td style="padding: 1rem;">{{ order.food_item.name }}</td>
+                        <td style="padding: 1rem; text-align: center;">{{ order.quantity }}</td>
+                        <td style="padding: 1rem; text-align: right; font-weight: 600;">₹{{ order.total_price }}</td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <span class="badge badge-active">{{ order.status|title }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="padding: 3rem; text-align: center; color: #94a3b8;">
+                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">🍽️</div>
+                <p>No food orders yet</p>
+                <a href="{% url 'food:food_ordering_home' %}" class="btn btn-primary" style="margin-top: 1rem;">Order Now</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% else %}
+    <!-- Faculty/Admin Dashboard -->
+    <div class="welcome-section">
+        <h2>🎓 Smart AI-Enabled Campus Management System</h2>
+        <p>Empowering education through intelligent automation and seamless management</p>
+    </div>
+
+    {% if user.is_authenticated %}
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">500+</div>
+                <div class="stat-label">Active Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">50+</div>
+                <div class="stat-label">Faculty Members</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">25+</div>
+                <div class="stat-label">Courses Offered</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">98%</div>
+                <div class="stat-label">Satisfaction Rate</div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <div class="card-icon">👥</div>
+            <h3>User Management</h3>
+            <p>Manage students, faculty, and administrative users efficiently</p>
+            <a href="{% url 'users:register' %}" class="card-action">Register User →</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">📊</div>
+            <h3>Attendance System</h3>
+            <p>Track attendance with AI-powered face recognition technology</p>
+            <a href="{% url 'attendance:attendance_home' %}" class="card-action">View Attendance →</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">🍽️</div>
+            <h3>Food Ordering</h3>
+            <p>Order meals from campus cafeteria with ease</p>
+            <a href="{% url 'food:food_ordering_home' %}" class="card-action">Order Food →</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">📚</div>
+            <h3>Campus Resources</h3>
+            <p>Access library books, classrooms, and other resources</p>
+            <a href="{% url 'resources:resources_home' %}" class="card-action">Browse Resources →</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">🎯</div>
+            <h3>Remedial Classes</h3>
+            <p>Schedule and manage make-up classes for students</p>
+            <a href="{% url 'remedial:remedial_home' %}" class="card-action">View Classes →</a>
+        </div>
+
+        {% if user.is_authenticated and user.role == 'faculty' %}
+        <div class="dashboard-card">
+            <div class="card-icon">👨‍🎓</div>
+            <h3>Student Database</h3>
+            <p>Access comprehensive student information and records</p>
+            <a href="{% url 'users:all_students_data' %}" class="card-action">View Students →</a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if not user.is_authenticated %}
+    <div class="welcome-section" style="margin-top: 3rem;">
+        <h2>Get Started Today!</h2>
+        <p style="margin-bottom: 2rem;">Join our smart campus management system</p>
+        <a href="{% url 'users:login' %}" class="btn btn-primary" style="margin-right: 1rem;">Login</a>
+        <a href="{% url 'users:register' %}" class="btn btn-secondary">Register</a>
+    </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🏛️ Campus Resources Management</h2>
+    <p>Manage classrooms, courses, faculty, and events efficiently</p>
+</div>
+
+<!-- Statistics Dashboard -->
+<div class="dashboard-grid">
+    <div class="stat-card">
+        <div class="stat-icon">🏢</div>
+        <div class="stat-number">{{ total_blocks }}</div>
+        <div class="stat-label">Campus Blocks</div>
+        <a href="{% url 'resources:block_list' %}" style="margin-top: 0.5rem; display: inline-block; color: var(--primary-color); font-size: 0.875rem; font-weight: 600;">View All →</a>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">🏫</div>
+        <div class="stat-number">{{ total_classrooms }}</div>
+        <div class="stat-label">Total Classrooms</div>
+        <a href="{% url 'resources:campus_classroom_list' %}" style="margin-top: 0.5rem; display: inline-block; color: var(--primary-color); font-size: 0.875rem; font-weight: 600;">View All →</a>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">📚</div>
+        <div class="stat-number">{{ total_courses }}</div>
+        <div class="stat-label">Active Courses</div>
+        <a href="{% url 'resources:course_list' %}" style="margin-top: 0.5rem; display: inline-block; color: var(--primary-color); font-size: 0.875rem; font-weight: 600;">View All →</a>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">👨‍🏫</div>
+        <div class="stat-number">{{ total_faculty }}</div>
+        <div class="stat-label">Faculty Members</div>
+        <a href="{% url 'resources:faculty_list' %}" style="margin-top: 0.5rem; display: inline-block; color: var(--primary-color); font-size: 0.875rem; font-weight: 600;">View All →</a>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-number">{{ total_events }}</div>
+        <div class="stat-label">Upcoming Events</div>
+        <a href="{% url 'resources:event_list' %}" style="margin-top: 0.5rem; display: inline-block; color: var(--primary-color); font-size: 0.875rem; font-weight: 600;">View All →</a>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="table-container" style="margin-top: 2rem;">
+    <div class="table-header">
+        <h3>⚡ Quick Actions</h3>
+    </div>
+    <div style="padding: 2rem;">
+        <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <a href="{% url 'resources:add_block' %}" class="stat-card" style="text-decoration: none; cursor: pointer; transition: all 0.3s ease;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🏢</div>
+                <h4 style="color: #1e293b; margin-bottom: 0.5rem;">Add Block</h4>
+                <p style="color: #64748b; font-size: 0.9rem;">Register new building</p>
+            </a>
+
+            <a href="{% url 'resources:add_campus_classroom' %}" class="stat-card" style="text-decoration: none; cursor: pointer; transition: all 0.3s ease;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🏫</div>
+                <h4 style="color: #1e293b; margin-bottom: 0.5rem;">Add Classroom</h4>
+                <p style="color: #64748b; font-size: 0.9rem;">Register new classroom</p>
+            </a>
+            
+            <a href="{% url 'resources:add_course' %}" class="stat-card" style="text-decoration: none; cursor: pointer; transition: all 0.3s ease;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">📚</div>
+                <h4 style="color: #1e293b; margin-bottom: 0.5rem;">Add Course</h4>
+                <p style="color: #64748b; font-size: 0.9rem;">Create new course</p>
+            </a>
+            
+            <a href="{% url 'resources:add_event' %}" class="stat-card" style="text-decoration: none; cursor: pointer; transition: all 0.3s ease;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">📅</div>
+                <h4 style="color: #1e293b; margin-bottom: 0.5rem;">Schedule Event</h4>
+                <p style="color: #64748b; font-size: 0.9rem;">Plan campus event</p>
+            </a>
+            
+            <a href="{% url 'resources:suggest_classrooms' %}" class="stat-card" style="text-decoration: none; cursor: pointer; transition: all 0.3s ease;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔍</div>
+                <h4 style="color: #1e293b; margin-bottom: 0.5rem;">Find Classroom</h4>
+                <p style="color: #64748b; font-size: 0.9rem;">Check availability</p>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Events -->
+{% if recent_events %}
+<div class="table-container" style="margin-top: 2rem;">
+    <div class="table-header">
+        <h3>📅 Upcoming Events</h3>
+        <a href="{% url 'resources:event_list' %}" class="btn btn-primary">View All</a>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Organizer</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in recent_events %}
+                <tr>
+                    <td><strong>{{ event.name }}</strong></td>
+                    <td>{{ event.organizer|default:"N/A" }}</td>
+                    <td>{{ event.start_time|date:"M d, Y h:i A" }}</td>
+                    <td>{{ event.end_time|date:"M d, Y h:i A" }}</td>
+                    <td><span class="badge badge-active">Scheduled</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Resource Management Tips -->
+<div class="table-container" style="margin-top: 2rem;">
+    <div class="table-header">
+        <h3>💡 Resource Management Tips</h3>
+    </div>
+    <div style="padding: 2rem;">
+        <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📋</div>
+                <h4>Organize Efficiently</h4>
+                <p>Keep track of all campus resources in one centralized system</p>
+            </div>
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔄</div>
+                <h4>Real-time Updates</h4>
+                <p>Update classroom availability and course assignments instantly</p>
+            </div>
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
+                <h4>Data Analytics</h4>
+                <p>Monitor resource utilization and optimize campus operations</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead {
+    background: #f8fafc;
+}
+
+.data-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+</style>
+{% endblock %}

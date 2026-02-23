@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="form-container">
+        <h2>Place Your Food Order</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ order_form.student.label_tag }}
+                {{ order_form.student }}
+                {% for error in order_form.student.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ order_form.pickup_time_slot.label_tag }}
+                {{ order_form.pickup_time_slot }}
+                {% for error in order_form.pickup_time_slot.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <h3>Select Food Items:</h3>
+            <div id="formset-container">
+                {{ formset.management_form }}
+                {% for form in formset %}
+                    <div class="order-item-form">
+                        {% for hidden in form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                        <div class="form-group">
+                            {{ form.food_item.label_tag }}
+                            {{ form.food_item }}
+                            {% for error in form.food_item.errors %}
+                                <p class="error-message">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.quantity.label_tag }}
+                            {{ form.quantity }}
+                            {% for error in form.quantity.errors %}
+                                <p class="error-message">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% if form.instance.pk %}
+                            {{ form.DELETE }}
+                            <label for="{{ form.DELETE.id_for_label }}">Remove</label>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="add-more-items" class="form-button" style="background-color: #6c757d; margin-top: 15px;">Add More Food Items</button>
+
+            <button type="submit" class="form-button" style="margin-top: 25px;">Confirm Order</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addMoreBtn = document.getElementById('add-more-items');
+            const formsetContainer = document.getElementById('formset-container');
+            let formIdx = document.querySelectorAll('.order-item-form').length - 1;
+
+            addMoreBtn.addEventListener('click', function() {
+                const emptyForm = document.querySelector('.order-item-form').cloneNode(true);
+                formIdx++;
+                emptyForm.innerHTML = emptyForm.innerHTML.replace(/__prefix__/g, formIdx);
+                formsetContainer.appendChild(emptyForm);
+
+                // Clear input values in the new form
+                emptyForm.querySelectorAll('input, select').forEach(input => {
+                    if (input.type === 'checkbox') {
+                        input.checked = false;
+                    } else {
+                        input.value = '';
+                    }
+                });
+
+                const totalForms = document.getElementById('id_orderitem_set-TOTAL_FORMS');
+                totalForms.value = formIdx + 1;
+            });
+        });
+    </script>
+{% endblock %}

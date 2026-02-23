@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Schedule Entry</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Add New Schedule Entry</h1>
+        <a href="{{ url_for('schedules') }}" class="button back-button">Back to Schedules</a>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <label for="classroom_id">Classroom:</label>
+            <select id="classroom_id" name="classroom_id" required>
+                <option value="">Select a Classroom</option>
+                {% for classroom in classrooms %}
+                    <option value="{{ classroom.id }}">{{ classroom.name }} (Capacity: {{ classroom.capacity }})</option>
+                {% endfor %}
+            </select>
+
+            <label for="day_of_week">Day of Week:</label>
+            <select id="day_of_week" name="day_of_week" required>
+                <option value="">Select Day</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+            </select>
+
+            <label for="start_time">Start Time:</label>
+            <input type="time" id="start_time" name="start_time" required>
+
+            <label for="end_time">End Time:</label>
+            <input type="time" id="end_time" name="end_time" required>
+
+            <label for="course_name">Course Name (Optional):</label>
+            <input type="text" id="course_name" name="course_name">
+
+            <label for="faculty_id">Faculty (Optional):</label>
+            <select id="faculty_id" name="faculty_id">
+                <option value="">Select Faculty</option>
+                {% for member in faculty %}
+                    <option value="{{ member.id }}">{{ member.name }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Add Schedule</button>
+        </form>
+    </div>
+</body>
+</html>

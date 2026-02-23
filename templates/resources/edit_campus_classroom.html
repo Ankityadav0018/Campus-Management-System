@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>✏️ Edit Classroom</h2>
+    <p>Update classroom details</p>
+</div>
+
+<div class="login-container" style="max-width: 700px;">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="user-icon">🏫</div>
+            <h2>Edit Classroom Information</h2>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.block.id_for_label }}">
+                    <strong>{{ form.block.label }}</strong>
+                    <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form.block }}
+                {% if form.block.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {{ form.block.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.room_number.id_for_label }}">
+                    <strong>{{ form.room_number.label }}</strong>
+                    <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form.room_number }}
+                {% if form.room_number.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {{ form.room_number.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.capacity.id_for_label }}">
+                    <strong>{{ form.capacity.label }}</strong>
+                    <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form.capacity }}
+                {% if form.capacity.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {{ form.capacity.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn-login" style="flex: 1;">
+                    💾 Save Changes
+                </button>
+                <a href="{% url 'resources:campus_classroom_list' %}" class="btn-login" style="flex: 1; background: #6b7280; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                    ❌ Cancel
+                </a>
+            </div>
+        </form>
+
+        <div class="form-footer">
+            <a href="{% url 'resources:campus_classroom_list' %}">← Back to Classroom List</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control {
+    width: 100%;
+    padding: 0.9rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+select.form-control {
+    cursor: pointer;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Events</h2>
+    <p><a href="{% url 'resources:add_event' %}" class="form-button">Add New Event</a></p>
+    <p><a href="{% url 'resources:resources_home' %}" class="form-button" style="background-color: #6c757d;">Back to Resources Home</a></p>
+
+    {% if events %}
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Organizer</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.name }}</td>
+                    <td>{{ event.description }}</td>
+                    <td>{{ event.start_time }}</td>
+                    <td>{{ event.end_time }}</td>
+                    <td>{{ event.organizer }}</td>
+                    <td>
+                        <a href="#" class="form-button">Edit</a>
+                        <form action="#" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="form-button" style="background-color: #e74c3c;" onclick="return confirm('Are you sure you want to delete this event?');">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No events found.</p>
+    {% endif %}
+{% endblock %}

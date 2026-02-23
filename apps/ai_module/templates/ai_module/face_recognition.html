@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Face Recognition Attendance</h2>
+    <p>Starting face recognition stream. Look at the camera to mark your attendance.</p>
+    <img src="{% url 'ai_module:video_feed' %}" width="640" height="480" autoplay>
+
+    <div id="attendance_status">
+        <!-- Attendance updates will be displayed here via JavaScript if implemented -->
+    </div>
+    <p><a href="{% url 'ai_module:ai_home' %}" class="form-button">Back to AI Module</a></p>
+{% endblock %}

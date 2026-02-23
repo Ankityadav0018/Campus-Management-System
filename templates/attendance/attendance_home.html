@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if not is_student %}
+<div class="welcome-section">
+    <h2>📊 Attendance Management System</h2>
+    <p>Track and manage student attendance with AI-powered face recognition</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ total_students|default:"0" }}</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_attendance|default:"0" }}</div>
+        <div class="stat-label">Attendance Records</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ avg_attendance|default:"0" }}%</div>
+        <div class="stat-label">Average Attendance</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ low_attendance_count|default:"0" }}</div>
+        <div class="stat-label">Students Below 75%</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ registered_faces_count|default:"0" }}</div>
+        <div class="stat-label">Faces Registered</div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <div class="card-icon">➕</div>
+        <h3>Add Student</h3>
+        <p>Register a new student in the attendance system</p>
+        <a href="{% url 'attendance:add_student' %}" class="card-action">Add Student →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📸</div>
+        <h3>Register Face</h3>
+        <p>Upload student photos for AI attendance</p>
+        <a href="{% url 'attendance:register_face' %}" class="card-action">Register Face →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">🎥</div>
+        <h3>AI Face Attendance</h3>
+        <p>Start automatic attendance with webcam</p>
+        <a href="{% url 'attendance:start_face_attendance' %}" class="card-action">Start AI Attendance →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">✓</div>
+        <h3>Manual Attendance</h3>
+        <p>Mark attendance manually if needed</p>
+        <a href="{% url 'attendance:mark_attendance' %}" class="card-action">Mark Attendance →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📈</div>
+        <h3>Attendance Summary</h3>
+        <p>View detailed attendance reports and statistics</p>
+        <a href="{% url 'attendance:attendance_summary' %}" class="card-action">View Summary →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">⚠️</div>
+        <h3>Low Attendance Alerts</h3>
+        <p>View students with attendance below 75%</p>
+        <a href="{% url 'attendance:absentee_alerts' %}" class="card-action">View Alerts →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">👥</div>
+        <h3>All Students</h3>
+        <p>View and manage all registered students</p>
+        <a href="{% url 'attendance:student_list' %}" class="card-action">View Students →</a>
+    </div>
+</div>
+{% else %}
+<div class="welcome-section">
+    <h2>📊 My Attendance</h2>
+    <p>View your attendance records</p>
+</div>
+{% endif %}
+
+<div class="table-container" style="margin-top: 3rem;">
+    <div class="table-header">
+        <h3>{% if is_student %}My Attendance Records{% else %}Recent Attendance Records{% endif %}</h3>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Faculty</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Mode</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in recent_records %}
+            <tr>
+                <td>{{ record.student.name }}</td>
+                <td>{{ record.course.name|default:"N/A" }}</td>
+                <td>{{ record.faculty.name }}</td>
+                <td>{{ record.class_date }}</td>
+                <td>
+                    {% if record.status == 'present' %}
+                        <span class="badge badge-active">Present</span>
+                    {% else %}
+                        <span class="badge" style="background: #fee2e2; color: #991b1b;">Absent</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record.mode == 'AI' %}
+                        <span class="badge" style="background: #dbeafe; color: #1e40af;">🤖 AI</span>
+                    {% elif record.mode == 'manual' %}
+                        <span class="badge" style="background: #f3f4f6; color: #374151;">✍️ Manual</span>
+                    {% else %}
+                        <span class="badge" style="background: #fef3c7; color: #92400e;">📚 Remedial</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem;">No attendance records yet. Start marking attendance!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

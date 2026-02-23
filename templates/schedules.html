@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedules</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Class Schedules</h1>
+        <a href="{{ url_for('add_schedule') }}" class="button">Add New Schedule Entry</a>
+        <a href="{{ url_for('index') }}" class="button back-button">Back to Students</a>
+        <a href="{{ url_for('classrooms') }}" class="button back-button">Manage Classrooms</a>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% if schedules %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Classroom</th>
+                        <th>Day</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Course Name</th>
+                        <th>Faculty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for schedule in schedules %}
+                    <tr>
+                        <td><a href="{{ url_for('view_classroom_schedule', classroom_id=schedule.classroom_id) }}">{{ schedule.classroom_name }}</a></td>
+                        <td>{{ schedule.day_of_week }}</td>
+                        <td>{{ schedule.start_time }}</td>
+                        <td>{{ schedule.end_time }}</td>
+                        <td>{{ schedule.course_name if schedule.course_name else 'N/A' }}</td>
+                        <td>{{ schedule.faculty_name if schedule.faculty_name else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No schedules found. Add one!</p>
+        {% endif %}
+    </div>
+</body>
+</html>

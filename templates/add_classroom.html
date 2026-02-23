@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Classroom</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Add New Classroom</h1>
+        <a href="{{ url_for('classrooms') }}" class="button back-button">Back to Classrooms</a>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <label for="name">Classroom Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="capacity">Capacity:</label>
+            <input type="number" id="capacity" name="capacity" required min="1">
+
+            <button type="submit">Add Classroom</button>
+        </form>
+    </div>
+</body>
+</html>

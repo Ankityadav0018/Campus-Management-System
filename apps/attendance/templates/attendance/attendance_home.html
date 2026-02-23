@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Management{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>�� Attendance Management System</h2>
+    <p>Track and manage student attendance efficiently with AI-powered face recognition</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 2rem;">
+    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="stat-value">{{ total_students }}</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="stat-value">{{ total_attendance }}</div>
+        <div class="stat-label">Total Records</div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+        <div class="stat-value">{{ avg_attendance }}%</div>
+        <div class="stat-label">Average Attendance</div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+        <div class="stat-value">{{ registered_faces_count }}</div>
+        <div class="stat-label">🤖 Registered Faces</div>
+    </div>
+</div>
+
+<!-- Action Cards -->
+<div class="dashboard-grid" style="margin-bottom: 2rem;">
+    <div class="dashboard-card">
+        <div class="card-icon">➕</div>
+        <h3>Add New Student</h3>
+        <p>Register a new student in the attendance system</p>
+        <a href="{% url 'attendance:add_student' %}" class="card-action">Add Student →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">✓</div>
+        <h3>Mark Attendance</h3>
+        <p>Manual or AI-powered face recognition attendance</p>
+        <a href="{% url 'attendance:mark_attendance' %}" class="card-action">Mark Now →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">🎥</div>
+        <h3>Face Recognition</h3>
+        <p>Use AI to automatically mark attendance via camera</p>
+        <a href="{% url 'attendance:start_face_attendance' %}" class="card-action">Start AI →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <h3>Attendance Records</h3>
+        <p>View detailed history with AI vs Manual filtering</p>
+        <a href="{% url 'attendance:attendance_records' %}" class="card-action">View Records →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📈</div>
+        <h3>Attendance Summary</h3>
+        <p>View detailed attendance reports and statistics</p>
+        <a href="{% url 'attendance:attendance_summary' %}" class="card-action">View Summary →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">👥</div>
+        <h3>Student List</h3>
+        <p>Browse all registered students and their faces</p>
+        <a href="{% url 'attendance:student_list' %}" class="card-action">View Students →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">��</div>
+        <h3>Register Faces</h3>
+        <p>Register student faces for AI recognition</p>
+        <a href="{% url 'attendance:register_face' %}" class="card-action">Register →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">⚠️</div>
+        <h3>Absentee Alerts</h3>
+        <p>View students with low attendance</p>
+        <a href="{% url 'attendance:absentee_alerts' %}" class="card-action">View Alerts →</a>
+    </div>
+</div>
+
+<!-- Recent Attendance Records -->
+{% if recent_records %}
+<div class="table-container">
+    <div class="table-header">
+        <h3>📋 Recent Attendance Records</h3>
+        <a href="{% url 'attendance:attendance_records' %}" class="btn btn-primary">View All →</a>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background: #f8fafc;">
+                <tr>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;">Student</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;">Faculty</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;">Course</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;">Date</th>
+                    <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #cbd5e1;">Status</th>
+                    <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #cbd5e1;">Mode</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in recent_records %}
+                <tr style="border-bottom: 1px solid #e2e8f0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                    <td style="padding: 1rem; font-weight: 600;">
+                        {% if is_student %}
+                            {{ record.student.name }}
+                        {% else %}
+                            {{ record.student.name }}
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem;">{{ record.faculty.name }}</td>
+                    <td style="padding: 1rem;">
+                        {% if record.course %}
+                            {{ record.course.name }}
+                        {% else %}
+                            <span style="color: #94a3b8;">--</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem;">{{ record.class_date|date:"d M Y" }}</td>
+                    <td style="padding: 1rem; text-align: center;">
+                        {% if record.status == 'present' %}
+                            <span class="badge badge-active" style="background: #10b981; padding: 0.4rem 0.8rem; border-radius: 15px;">✅ Present</span>
+                        {% else %}
+                            <span class="badge" style="background: #ef4444; color: white; padding: 0.4rem 0.8rem; border-radius: 15px;">❌ Absent</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem; text-align: center;">
+                        {% if record.mode == 'AI' %}
+                            <span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 15px; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">
+                                🤖 AI
+                            </span>
+                        {% elif record.mode == 'manual' %}
+                            <span class="badge" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 15px; box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);">
+                                📝 Manual
+                            </span>
+                        {% elif record.mode == 'remedial' %}
+                            <span class="badge" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 15px; box-shadow: 0 2px 8px rgba(67, 233, 123, 0.3);">
+                                🔄 Remedial
+                            </span>
+                        {% else %}
+                            <span class="badge" style="background: #94a3b8; color: white; padding: 0.4rem 0.8rem; border-radius: 15px;">{{ record.mode }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{% url 'home' %}" class="btn btn-secondary">← Back to Home</a>
+</div>
+
+<style>
+.stat-card {
+    padding: 2rem;
+    border-radius: 16px;
+    color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.95rem;
+    opacity: 0.95;
+}
+</style>
+{% endblock %}

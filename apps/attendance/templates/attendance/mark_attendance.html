@@ -1,0 +1,438 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>✓ Mark Attendance</h2>
+    <p>Choose Manual entry or AI Face Recognition — all in one place</p>
+</div>
+
+<!-- ── Tab Bar ──────────────────────────────────────────────────────────── -->
+<div style="display:flex; gap:12px; margin-bottom:2rem;">
+    <button class="att-tab active" id="tab-manual" onclick="switchTab('manual')">
+        📝 Manual Attendance
+    </button>
+    <button class="att-tab" id="tab-face" onclick="switchTab('face')">
+        🤖 AI Face Attendance
+    </button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     TAB 1 – MANUAL
+══════════════════════════════════════════════════════════════════════ -->
+<div id="panel-manual">
+    <div class="login-card" style="max-width:900px; margin:0 auto;">
+        <div class="login-header">
+            <div class="user-icon">📝</div>
+            <h2>Bulk Manual Attendance</h2>
+            <p>Select course, date &amp; time, then mark each student</p>
+        </div>
+
+        <form method="post" action="{% url 'attendance:mark_attendance' %}" id="bulkForm">
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="manual">
+
+            <div class="form-group">
+                <label><strong>Select Course</strong> <span style="color:#ef4444">*</span></label>
+                <select name="course" id="course" class="form-control" required>
+                    <option value="">-- Select Course --</option>
+                    {% for c in my_courses %}
+                        <option value="{{ c.id }}">{{ c.name }} ({{ c.course_id }})</option>
+                    {% endfor %}
+                </select>
+                {% if not my_courses %}<small style="color:#ef4444">No courses assigned. Contact admin.</small>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label><strong>Class Date</strong> <span style="color:#ef4444">*</span></label>
+                <input type="date" name="class_date" id="class_date" class="form-control"
+                       value="{{ current_date|date:'Y-m-d' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label><strong>Class Time Slot</strong> <span style="color:#ef4444">*</span></label>
+                <select name="class_time" id="class_time" class="form-control" required>
+                    <option value="">-- Select Time --</option>
+                    <option value="08:00">08:00 – 09:00 AM</option>
+                    <option value="09:00">09:00 – 10:00 AM</option>
+                    <option value="10:00">10:00 – 11:00 AM</option>
+                    <option value="11:00">11:00 AM – 12:00 PM</option>
+                    <option value="12:00">12:00 – 01:00 PM</option>
+                    <option value="13:00">01:00 – 02:00 PM</option>
+                    <option value="14:00">02:00 – 03:00 PM</option>
+                    <option value="15:00">03:00 – 04:00 PM</option>
+                    <option value="16:00">04:00 – 05:00 PM</option>
+                    <option value="17:00">05:00 – 06:00 PM</option>
+                </select>
+            </div>
+
+            <!-- Students table (shown after all 3 fields filled) -->
+            <div id="students-table-container" style="display:none; margin-top:1.5rem;">
+                <div class="table-header" style="display:flex; justify-content:space-between; align-items:center; padding:1rem; background:#f8fafc; border-radius:8px 8px 0 0;">
+                    <h3 style="margin:0;">👥 Students ({{ all_students.count }})</h3>
+                    <div style="display:flex; gap:.5rem;">
+                        <button type="button" onclick="markAllAs('present')" class="btn btn-primary" style="padding:.5rem 1rem; font-size:.875rem;">✓ All Present</button>
+                        <button type="button" onclick="markAllAs('absent')"  class="btn" style="padding:.5rem 1rem; font-size:.875rem; background:#ef4444; color:white;">✗ All Absent</button>
+                    </div>
+                </div>
+                <div style="max-height:480px; overflow-y:auto; border:2px solid #e2e8f0; border-radius:0 0 8px 8px;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead style="position:sticky; top:0; background:#f1f5f9; z-index:10;">
+                            <tr>
+                                <th style="padding:1rem; text-align:left; border-bottom:2px solid #cbd5e1;">#</th>
+                                <th style="padding:1rem; text-align:left; border-bottom:2px solid #cbd5e1;">ID</th>
+                                <th style="padding:1rem; text-align:left; border-bottom:2px solid #cbd5e1;">Name</th>
+                                <th style="padding:1rem; text-align:left; border-bottom:2px solid #cbd5e1;">Email</th>
+                                <th style="padding:1rem; text-align:center; border-bottom:2px solid #cbd5e1;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in all_students %}
+                            <tr style="border-bottom:1px solid #e2e8f0;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                                <td style="padding:1rem;">{{ forloop.counter }}</td>
+                                <td style="padding:1rem; font-weight:600;">{{ student.student_id }}</td>
+                                <td style="padding:1rem;">{{ student.name }}</td>
+                                <td style="padding:1rem; color:#64748b; font-size:.875rem;">{{ student.email }}</td>
+                                <td style="padding:1rem; text-align:center;">
+                                    <div style="display:flex; gap:1rem; justify-content:center;">
+                                        <label style="display:flex; align-items:center; gap:.5rem; cursor:pointer; padding:.5rem 1rem; border-radius:8px; background:#ecfdf5; border:2px solid transparent; transition:all .2s;">
+                                            <input type="radio" name="status_{{ student.id }}" value="present" class="attendance-radio" style="width:18px;height:18px;">
+                                            <span style="color:#059669; font-weight:600;">✓ Present</span>
+                                        </label>
+                                        <label style="display:flex; align-items:center; gap:.5rem; cursor:pointer; padding:.5rem 1rem; border-radius:8px; background:#fef2f2; border:2px solid transparent; transition:all .2s;">
+                                            <input type="radio" name="status_{{ student.id }}" value="absent" class="attendance-radio" style="width:18px;height:18px;">
+                                            <span style="color:#dc2626; font-weight:600;">✗ Absent</span>
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" style="padding:3rem; text-align:center; color:#94a3b8;">No students found</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login" id="submitBtn" style="margin-top:2rem; width:100%;" disabled>
+                ✅ Submit Attendance
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     TAB 2 – AI FACE
+══════════════════════════════════════════════════════════════════════ -->
+<div id="panel-face" style="display:none;">
+    <div style="max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 420px; gap:2rem; align-items:start;">
+
+        <!-- Camera feed -->
+        <div class="table-container" style="margin:0;">
+            <div class="table-header"><h3>📹 Live Camera</h3></div>
+            <div style="padding:1.5rem; text-align:center; position:relative;">
+                <video id="faceVideo" autoplay muted playsinline
+                       style="width:100%; border-radius:12px; background:#000; display:block;"></video>
+                <canvas id="faceCanvas" style="display:none;"></canvas>
+
+                <!-- Overlay status badge -->
+                <div id="camStatus" style="position:absolute; top:1.8rem; left:1.8rem; background:rgba(0,0,0,.6); color:#fff; padding:.4rem .9rem; border-radius:20px; font-size:.8rem; backdrop-filter:blur(4px);">
+                    🔴 Camera off
+                </div>
+            </div>
+        </div>
+
+        <!-- Control panel -->
+        <div class="table-container" style="margin:0;">
+            <div class="table-header"><h3>⚙️ Settings</h3></div>
+            <div style="padding:1.5rem;">
+
+                <div class="form-group">
+                    <label><strong>Course</strong> <span style="color:#ef4444">*</span></label>
+                    <select id="face-course" class="form-control" required>
+                        <option value="">-- Select Course --</option>
+                        {% for c in my_courses %}
+                            <option value="{{ c.id }}">{{ c.name }} ({{ c.course_id }})</option>
+                        {% endfor %}
+                    </select>
+                    {% if not my_courses %}<small style="color:#ef4444">No courses assigned.</small>{% endif %}
+                </div>
+
+                <!-- Start / Stop button -->
+                <button id="toggleCamBtn" onclick="toggleCamera()" class="btn-login"
+                        style="width:100%; margin-bottom:1rem; background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                    🎥 Start Camera
+                </button>
+
+                <!-- Scan button (manual trigger) -->
+                <button id="scanBtn" onclick="scanOnce()" class="btn-login"
+                        style="width:100%; background:linear-gradient(135deg,#059669,#10b981); display:none;">
+                    📸 Scan &amp; Mark Now
+                </button>
+
+                <p style="text-align:center; font-size:.8rem; color:#64748b; margin:.5rem 0 0;">
+                    Auto-scans every <strong>3 seconds</strong> while camera is on
+                </p>
+
+                <hr style="margin:1.2rem 0; border-color:#e2e8f0;">
+
+                <!-- Session log -->
+                <h4 style="margin:0 0 .8rem; color:#1e293b;">📋 Session Log</h4>
+                <div id="sessionLog"
+                     style="max-height:280px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px; padding:.8rem; background:#f8fafc; font-size:.85rem;">
+                    <p style="color:#94a3b8; text-align:center; margin:0;">No scans yet…</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     ATTENDANCE POPUP
+══════════════════════════════════════════════════════════════════════ -->
+<div id="attPopup" style="
+    display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(.8);
+    background:#fff; border-radius:20px; padding:2.5rem 3rem; z-index:9999;
+    box-shadow:0 25px 80px rgba(0,0,0,.35); text-align:center;
+    min-width:320px; max-width:480px; transition:transform .25s ease, opacity .25s ease; opacity:0;">
+    <div id="popupIcon" style="font-size:4rem; margin-bottom:.5rem;">✅</div>
+    <h2 id="popupTitle" style="margin:0 0 .5rem; color:#1e293b;"></h2>
+    <p  id="popupBody"  style="color:#64748b; margin:0 0 1.5rem; line-height:1.6;"></p>
+    <button onclick="closePopup()" style="
+        padding:.7rem 2rem; background:linear-gradient(135deg,#6366f1,#8b5cf6);
+        color:#fff; border:none; border-radius:10px; font-size:1rem; cursor:pointer;">
+        OK
+    </button>
+</div>
+<!-- dark backdrop -->
+<div id="popupBackdrop" onclick="closePopup()" style="
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.45);
+    z-index:9998; backdrop-filter:blur(3px);"></div>
+
+<!-- ── Styles ─────────────────────────────────────────────────────────── -->
+<style>
+.att-tab {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #1e293b;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: all .2s;
+}
+.att-tab.active {
+    border-color: var(--primary-color);
+    background: #ffffff;
+    color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(99,102,241,0.18);
+}
+.att-tab:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: 0 4px 10px rgba(99,102,241,0.12);
+}
+
+.form-control {
+    width:100%; padding:.9rem; border:2px solid #e2e8f0; border-radius:12px;
+    font-size:1rem; transition:border-color .2s; box-sizing:border-box;
+}
+.form-control:focus { outline:none; border-color:var(--primary-color); }
+.form-group { margin-bottom:1.4rem; }
+.form-group label { display:block; margin-bottom:.4rem; color:#1e293b; }
+
+/* radio highlight */
+label:has(input[type="radio"]:checked) {
+    border-color:var(--primary-color) !important;
+    background:rgba(59,130,246,.1) !important;
+}
+
+/* log entry colours */
+.log-ok   { color:#059669; }
+.log-dup  { color:#f59e0b; }
+.log-no   { color:#94a3b8; }
+.log-err  { color:#ef4444; }
+</style>
+
+<!-- ── Scripts ────────────────────────────────────────────────────────── -->
+<script>
+const FACULTY_ID  = "{{ current_faculty.id }}";
+const CAPTURE_URL = "{% url 'attendance:capture_attendance' %}";
+const CSRF        = "{{ csrf_token }}";
+
+/* ── Tab switching ──────────────────────────────────────────────────── */
+function switchTab(tab) {
+    document.getElementById('panel-manual').style.display = tab === 'manual' ? '' : 'none';
+    document.getElementById('panel-face').style.display   = tab === 'face'   ? '' : 'none';
+    document.querySelectorAll('.att-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    if (tab !== 'face') stopCamera();
+}
+
+/* ── Manual: show table once all 3 fields filled ───────────────────── */
+['course','class_date','class_time'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+        const ready = document.getElementById('course').value &&
+                      document.getElementById('class_date').value &&
+                      document.getElementById('class_time').value;
+        document.getElementById('students-table-container').style.display = ready ? 'block' : 'none';
+        document.getElementById('submitBtn').disabled = !ready;
+    });
+});
+function markAllAs(status) {
+    document.querySelectorAll(`input[type="radio"][value="${status}"]`).forEach(r => r.checked = true);
+}
+
+/* ── Camera management ──────────────────────────────────────────────── */
+let videoStream   = null;
+let scanInterval  = null;
+let cameraRunning = false;
+let markedThisSession = new Set();   // avoid duplicate popups
+
+async function toggleCamera() {
+    if (cameraRunning) { stopCamera(); return; }
+
+    const courseId = document.getElementById('face-course').value;
+    if (!courseId) { showPopup('⚠️', 'Select Course', 'Please choose a course before starting the camera.', false); return; }
+
+    try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: { width:640, height:480 }, audio:false });
+        const video = document.getElementById('faceVideo');
+        video.srcObject = videoStream;
+        await video.play();
+
+        cameraRunning = true;
+        document.getElementById('toggleCamBtn').textContent  = '⏹ Stop Camera';
+        document.getElementById('toggleCamBtn').style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+        document.getElementById('scanBtn').style.display    = 'inline-block';
+        document.getElementById('camStatus').textContent    = '🟢 Scanning…';
+        document.getElementById('camStatus').style.background = 'rgba(5,150,105,.8)';
+
+        // Auto-scan every 3 seconds
+        scanInterval = setInterval(scanOnce, 3000);
+        // First scan immediately after 1 s (let camera warm up)
+        setTimeout(scanOnce, 1000);
+
+    } catch(e) {
+        showPopup('❌', 'Camera Error', e.message || 'Could not access camera.', false);
+    }
+}
+
+function stopCamera() {
+    if (scanInterval)  { clearInterval(scanInterval); scanInterval = null; }
+    if (videoStream)   { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+    cameraRunning = false;
+    const video = document.getElementById('faceVideo');
+    if (video) video.srcObject = null;
+    document.getElementById('toggleCamBtn').textContent  = '🎥 Start Camera';
+    document.getElementById('toggleCamBtn').style.background = 'linear-gradient(135deg,#6366f1,#8b5cf6)';
+    document.getElementById('scanBtn').style.display    = 'none';
+    document.getElementById('camStatus').textContent    = '🔴 Camera off';
+    document.getElementById('camStatus').style.background = 'rgba(0,0,0,.6)';
+}
+
+/* ── Grab one frame and send to server ─────────────────────────────── */
+async function scanOnce() {
+    const video    = document.getElementById('faceVideo');
+    const canvas   = document.getElementById('faceCanvas');
+    const courseId = document.getElementById('face-course').value;
+    if (!courseId || !cameraRunning || video.readyState < 2) return;
+
+    canvas.width  = video.videoWidth  || 640;
+    canvas.height = video.videoHeight || 480;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    const frameB64 = canvas.toDataURL('image/jpeg', 0.85);
+
+    document.getElementById('camStatus').textContent = '🔍 Scanning…';
+
+    try {
+        const resp = await fetch(CAPTURE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            body: JSON.stringify({ faculty_id: FACULTY_ID, course_id: courseId, frame: frameB64 })
+        });
+        const data = await resp.json();
+        handleScanResult(data);
+    } catch(e) {
+        appendLog('❌ Network error: ' + e.message, 'log-err');
+    }
+
+    document.getElementById('camStatus').textContent = '🟢 Scanning…';
+}
+
+/* ── Handle server response ─────────────────────────────────────────── */
+function handleScanResult(data) {
+    if (!data.success) {
+        appendLog('⚠️ ' + (data.error || 'Server error'), 'log-err');
+        return;
+    }
+
+    if (!data.recognized || data.count === 0) {
+        // Silently skip – face not found this frame (normal during scanning)
+        return;
+    }
+
+    data.marked_students.forEach(s => {
+        const key = s.name + '_' + new Date().toDateString();
+        if (!s.already_marked && !markedThisSession.has(key)) {
+            markedThisSession.add(key);
+            // Show big popup for first-time mark
+            showPopup(
+                '✅',
+                'Attendance Marked!',
+                `<strong>${s.name}</strong> has been marked <span style="color:#059669;font-weight:700;">Present</span><br>
+                 <small style="color:#94a3b8;">Confidence: ${s.confidence}%</small>`,
+                true
+            );
+        }
+        const cls   = s.already_marked ? 'log-dup' : 'log-ok';
+        const badge = s.already_marked ? '(already marked)' : '✅ Marked Present';
+        appendLog(`${s.name} — ${badge} &nbsp;<small style="color:#94a3b8;">${s.confidence}%</small>`, cls);
+    });
+}
+
+/* ── Popup helpers ──────────────────────────────────────────────────── */
+function showPopup(icon, title, body, autoClose) {
+    document.getElementById('popupIcon').textContent  = icon;
+    document.getElementById('popupTitle').textContent = title;
+    document.getElementById('popupBody').innerHTML    = body;
+    const popup    = document.getElementById('attPopup');
+    const backdrop = document.getElementById('popupBackdrop');
+    popup.style.display    = 'block';
+    backdrop.style.display = 'block';
+    requestAnimationFrame(() => {
+        popup.style.opacity   = '1';
+        popup.style.transform = 'translate(-50%,-50%) scale(1)';
+    });
+    if (autoClose) setTimeout(closePopup, 3500);
+}
+function closePopup() {
+    const popup    = document.getElementById('attPopup');
+    const backdrop = document.getElementById('popupBackdrop');
+    popup.style.opacity   = '0';
+    popup.style.transform = 'translate(-50%,-50%) scale(.8)';
+    setTimeout(() => { popup.style.display = 'none'; backdrop.style.display = 'none'; }, 260);
+}
+
+/* ── Session log helper ─────────────────────────────────────────────── */
+function appendLog(html, cls) {
+    const log = document.getElementById('sessionLog');
+    const now = new Date().toLocaleTimeString();
+    const p   = document.createElement('p');
+    p.className = cls;
+    p.style     = 'margin:.3rem 0; border-bottom:1px solid #f1f5f9; padding-bottom:.3rem;';
+    p.innerHTML = `<span style="color:#94a3b8; font-size:.75rem;">${now}</span> &nbsp;${html}`;
+    // Remove placeholder
+    const placeholder = log.querySelector('p[style*="color:#94a3b8"]');
+    if (placeholder && placeholder.textContent.includes('No scans')) placeholder.remove();
+    log.prepend(p);
+}
+
+/* ── Cleanup on leave ───────────────────────────────────────────────── */
+window.addEventListener('beforeunload', stopCamera);
+</script>
+{% endblock %}

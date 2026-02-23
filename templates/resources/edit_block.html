@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>✏️ Edit Block</h2>
+    <p>Update building/block information</p>
+</div>
+
+<div class="login-container" style="max-width: 700px;">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="user-icon">🏢</div>
+            <h2>Edit Block Details</h2>
+            <p>Modify the block information below</p>
+        </div>
+
+        <form method="POST" id="editBlockForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">
+                    <strong>{{ form.name.label }}</strong>
+                    <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {{ form.name.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">
+                    <strong>{{ form.description.label }}</strong>
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {{ form.description.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="alert alert-info" style="background: #dbeafe; color: #1e40af; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <strong>ℹ️ Note:</strong>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                    This block currently has <strong>{{ block.campusclassroom_set.count }}</strong> classroom(s) associated with it.
+                    Updating the block name will not affect the classrooms.
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn-login" style="flex: 1;">
+                    💾 Save Changes
+                </button>
+                <a href="{% url 'resources:block_list' %}" class="btn-login" style="flex: 1; background: #6b7280; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                    ❌ Cancel
+                </a>
+            </div>
+        </form>
+
+        <div class="form-footer">
+            <a href="{% url 'resources:block_list' %}">← Back to Block List</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control {
+    width: 100%;
+    padding: 0.9rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+textarea.form-control {
+    resize: vertical;
+}
+</style>
+{% endblock %}

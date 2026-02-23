@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🏫 Classroom Management</h2>
+    <p>View and manage all campus classrooms</p>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>�� All Classrooms</h3>
+        <a href="{% url 'resources:add_campus_classroom' %}" class="btn btn-primary">
+            ➕ Add New Classroom
+        </a>
+    </div>
+
+    {% if classrooms %}
+    <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Building/Block</th>
+                    <th>Room Number</th>
+                    <th>Capacity</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for classroom in classrooms %}
+                <tr>
+                    <td>
+                        <strong style="color: var(--primary-color);">{{ classroom.block.name }}</strong>
+                    </td>
+                    <td>
+                        <span style="font-size: 1.1rem; font-weight: 600;">{{ classroom.room_number }}</span>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.25rem;">👥</span>
+                            <strong>{{ classroom.capacity }}</strong> seats
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-active">Available</span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="{% url 'resources:edit_campus_classroom' classroom.pk %}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                ✏️ Edit
+                            </a>
+                            <form method="POST" action="{% url 'resources:delete_campus_classroom' classroom.pk %}" style="display: inline;" onsubmit="return confirm('Delete this classroom?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.875rem; background: #ef4444; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: 600;">
+                                    🗑️ Delete
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="padding: 4rem 2rem; text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;">🏫</div>
+        <h3 style="color: #64748b;">No Classrooms Found</h3>
+        <p style="color: #94a3b8; margin-bottom: 2rem;">Start by adding classrooms to the system</p>
+        <a href="{% url 'resources:add_campus_classroom' %}" class="btn-login" style="display: inline-block; text-decoration: none;">
+            ➕ Add First Classroom
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead {
+    background: #f8fafc;
+}
+
+.data-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table tbody tr:hover {
+    background: #f8fafc;
+}
+</style>
+{% endblock %}

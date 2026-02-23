@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🎥 AI Face Recognition Attendance</h2>
+    <p>Automated attendance marking using facial recognition technology</p>
+</div>
+
+<div class="dashboard-grid" style="grid-template-columns: 1fr 1fr;">
+    <!-- Video Feed Section -->
+    <div class="table-container" style="margin: 0;">
+        <div class="table-header">
+            <h3>📹 Live Camera Feed</h3>
+        </div>
+        <div style="padding: 2rem; text-align: center;">
+            <img id="videoFeed" src="{% url 'attendance:video_feed' %}" 
+                 style="width: 100%; max-width: 640px; border-radius: 12px; box-shadow: var(--card-shadow);"
+                 alt="Video feed will appear here">
+            <p style="margin-top: 1rem; color: var(--text-light);">
+                <span class="loading" id="loadingIndicator" style="display: none;"></span>
+                <span id="statusText">Students will be recognized automatically</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="table-container" style="margin: 0;">
+        <div class="table-header">
+            <h3>⚙️ Attendance Settings</h3>
+        </div>
+        <div style="padding: 2rem;">
+            <form id="attendanceForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="faculty_id">Select Faculty *</label>
+                    <select name="faculty_id" id="faculty_id" required 
+                            style="width: 100%; padding: 0.9rem; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc;">
+                        <option value="">-- Choose Faculty --</option>
+                        {% for faculty in faculties %}
+                            <option value="{{ faculty.id }}" {% if selected_faculty_id and faculty.id|stringformat:"s" == selected_faculty_id %}selected{% endif %}>
+                                {{ faculty.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="course_id">Select Course (Optional)</label>
+                    <select name="course_id" id="course_id"
+                            style="width: 100%; padding: 0.9rem; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #f8fafc;">
+                        <option value="">-- Choose Course --</option>
+                        {% for course in courses %}
+                            <option value="{{ course.id }}" {% if selected_course_id and course.id|stringformat:"s" == selected_course_id %}selected{% endif %}>
+                                {{ course.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="button" onclick="captureAttendance()" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                    📸 Capture Attendance Now
+                </button>
+            </form>
+
+            <div id="resultSection" style="margin-top: 2rem; display: none;">
+                <div class="alert alert-success" style="border-radius: 12px;">
+                    <h4 style="margin-bottom: 0.5rem;">✅ Attendance Marked!</h4>
+                    <p id="resultMessage"></p>
+                    <ul id="markedStudentsList" style="margin: 0.5rem 0 0 1.5rem;"></ul>
+                </div>
+            </div>
+
+            <div id="errorSection" style="margin-top: 2rem; display: none;">
+                <div class="alert alert-error" style="border-radius: 12px;">
+                    <h4 style="margin-bottom: 0.5rem;">❌ Error</h4>
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Instructions Section -->
+<div class="table-container" style="margin-top: 2rem;">
+    <div class="table-header">
+        <h3>📖 How to Use Face Attendance</h3>
+    </div>
+    <div style="padding: 2rem;">
+        <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+            <div class="dashboard-card">
+                <div class="card-icon">1️⃣</div>
+                <h3>Select Faculty & Course</h3>
+                <p>Choose the faculty member and course for which you want to mark attendance</p>
+            </div>
+            <div class="dashboard-card">
+                <div class="card-icon">2️⃣</div>
+                <h3>Position Students</h3>
+                <p>Students should stand in front of the camera with faces visible</p>
+            </div>
+            <div class="dashboard-card">
+                <div class="card-icon">3️⃣</div>
+                <h3>Capture Attendance</h3>
+                <p>Click the capture button to automatically recognize and mark attendance</p>
+            </div>
+            <div class="dashboard-card">
+                <div class="card-icon">4️⃣</div>
+                <h3>View Results</h3>
+                <p>See which students were recognized and marked present instantly</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; padding: 1.5rem; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px;">
+            <strong>⚠️ Important Notes:</strong>
+            <ul style="margin: 0.5rem 0 0 1.5rem; line-height: 1.8;">
+                <li>Ensure all students have registered their faces first</li>
+                <li>Good lighting is essential for accurate recognition</li>
+                <li>Students should face the camera directly</li>
+                <li>Attendance is marked for the current date</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+function captureAttendance() {
+    const facultyId = document.getElementById('faculty_id').value;
+    const courseId = document.getElementById('course_id').value;
+    
+    if (!facultyId) {
+        alert('Please select a faculty member');
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('loadingIndicator').style.display = 'inline-block';
+    document.getElementById('statusText').textContent = 'Processing...';
+    document.getElementById('resultSection').style.display = 'none';
+    document.getElementById('errorSection').style.display = 'none';
+    
+    // Get CSRF token
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // Send request to capture attendance
+    fetch('{% url "attendance:capture_attendance" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            faculty_id: facultyId,
+            course_id: courseId || null
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || `Server error: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        document.getElementById('loadingIndicator').style.display = 'none';
+        
+        if (data.success) {
+            if (data.count > 0) {
+                document.getElementById('resultSection').style.display = 'block';
+                document.getElementById('resultMessage').textContent = 
+                    data.message || `Successfully marked attendance for ${data.count} student(s)`;
+                
+                const studentsList = document.getElementById('markedStudentsList');
+                studentsList.innerHTML = '';
+                data.marked_students.forEach(student => {
+                    const li = document.createElement('li');
+                    li.textContent = student;
+                    studentsList.appendChild(li);
+                });
+                
+                document.getElementById('statusText').textContent = 'Attendance captured successfully!';
+            } else {
+                // No faces recognized
+                document.getElementById('errorSection').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 
+                    data.message || 'No faces recognized. Please ensure students are facing the camera and have registered faces.';
+                document.getElementById('statusText').textContent = 'No students recognized';
+            }
+        } else {
+            throw new Error(data.error || 'Unknown error occurred');
+        }
+    })
+    .catch(error => {
+        document.getElementById('loadingIndicator').style.display = 'none';
+        document.getElementById('errorSection').style.display = 'block';
+        document.getElementById('errorMessage').textContent = error.message;
+        document.getElementById('statusText').textContent = 'Error occurred';
+    });
+}
+
+// Auto-hide alerts after 10 seconds
+setTimeout(() => {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        if (alert.style.display !== 'none') {
+            alert.style.opacity = '0';
+            alert.style.transition = 'opacity 0.5s';
+            setTimeout(() => alert.style.display = 'none', 500);
+        }
+    });
+}, 10000);
+</script>
+{% endblock %}

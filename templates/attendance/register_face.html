@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🤖 Register Face for AI Attendance</h2>
+    <p>Capture a clear photo using camera or upload an image to register student face</p>
+</div>
+
+<div class="login-container" style="max-width: 800px;">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="user-icon">📸</div>
+            <h2>Face Registration</h2>
+            <p>Choose camera capture or file upload</p>
+        </div>
+
+        <!-- Tab Selection -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0;">
+            <button type="button" onclick="switchTab('camera')" id="cameraTab" class="tab-button active" style="flex: 1; padding: 1rem; border: none; background: none; cursor: pointer; font-size: 1rem; font-weight: 600; border-bottom: 3px solid var(--primary-color); color: var(--primary-color);">
+                📹 Camera Capture
+            </button>
+            <button type="button" onclick="switchTab('upload')" id="uploadTab" class="tab-button" style="flex: 1; padding: 1rem; border: none; background: none; cursor: pointer; font-size: 1rem; font-weight: 600; color: #64748b;">
+                📁 Upload Photo
+            </button>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" id="registrationForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="student_id">Select Student</label>
+                <select name="student_id" id="student_id" class="form-group input" required style="width: 100%; padding: 0.9rem; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem;">
+                    <option value="">-- Choose Student --</option>
+                    {% for student in students %}
+                        <option value="{{ student.id }}" {% if selected_student and selected_student.id == student.id %}selected{% endif %}>
+                            {{ student.name }} ({{ student.student_id }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Camera Capture Section -->
+            <div id="cameraSection" class="capture-section">
+                <div class="form-group">
+                    <label>Camera Preview</label>
+                    <div style="text-align: center; margin-bottom: 1rem;">
+                        <video id="cameraPreview" autoplay style="width: 100%; max-width: 500px; border-radius: 12px; background: #000; display: none;"></video>
+                        <canvas id="capturedCanvas" style="width: 100%; max-width: 500px; border-radius: 12px; display: none;"></canvas>
+                        <div id="cameraPlaceholder" style="width: 100%; max-width: 500px; height: 300px; margin: 0 auto; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #64748b;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">📷</div>
+                                <p>Click "Start Camera" to begin</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <button type="button" onclick="startCamera()" id="startCameraBtn" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+                            🎥 Start Camera
+                        </button>
+                        <button type="button" onclick="capturePhoto()" id="captureBtn" class="btn btn-success" style="padding: 0.75rem 1.5rem; display: none;">
+                            📸 Capture Photo
+                        </button>
+                        <button type="button" onclick="retakePhoto()" id="retakeBtn" class="btn btn-warning" style="padding: 0.75rem 1.5rem; display: none;">
+                            🔄 Retake
+                        </button>
+                    </div>
+                    
+                    <input type="hidden" name="captured_image" id="capturedImageData">
+                </div>
+            </div>
+
+            <!-- File Upload Section -->
+            <div id="uploadSection" class="capture-section" style="display: none;">
+                <div class="form-group">
+                    <label for="face_image">Upload Face Photo</label>
+                    <input type="file" name="face_image" id="face_image" accept="image/*"
+                           style="width: 100%; padding: 0.9rem; border: 2px solid #e2e8f0; border-radius: 12px; background: #f8fafc;">
+                </div>
+            </div>
+
+            <div class="alert alert-info" style="background: #dbeafe; color: #1e40af; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <strong>📋 Requirements:</strong>
+                <ul style="margin: 0.5rem 0 0 1.5rem; font-size: 0.9rem;">
+                    <li>Clear, well-lit photo</li>
+                    <li>Face should be visible and centered</li>
+                    <li>Only one person in the photo</li>
+                    <li>No glasses or face coverings</li>
+                </ul>
+            </div>
+
+            <button type="submit" class="btn-login" id="submitBtn">
+                ✅ Register Face
+            </button>
+        </form>
+
+        <div class="form-footer">
+            <a href="{% url 'attendance:student_list' %}">← Back to Student List</a>
+        </div>
+    </div>
+</div>
+
+<div class="table-container" style="margin-top: 2rem;">
+    <div class="table-header">
+        <h3>💡 Tips for Best Results</h3>
+    </div>
+    <div style="padding: 2rem;">
+        <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💡</div>
+                <h4>Good Lighting</h4>
+                <p>Face the camera in a well-lit environment</p>
+            </div>
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">👤</div>
+                <h4>Center Your Face</h4>
+                <p>Position your face in the center of the frame</p>
+            </div>
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎯</div>
+                <h4>Look at Camera</h4>
+                <p>Face the camera directly for best accuracy</p>
+            </div>
+            <div class="stat-card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">😊</div>
+                <h4>Natural Expression</h4>
+                <p>Maintain a neutral or slightly smiling expression</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let videoStream = null;
+let currentTab = 'camera';
+
+function switchTab(tab) {
+    currentTab = tab;
+    
+    // Update tab buttons
+    document.getElementById('cameraTab').classList.toggle('active', tab === 'camera');
+    document.getElementById('uploadTab').classList.toggle('active', tab === 'upload');
+    
+    // Update tab button styles
+    if (tab === 'camera') {
+        document.getElementById('cameraTab').style.borderBottom = '3px solid var(--primary-color)';
+        document.getElementById('cameraTab').style.color = 'var(--primary-color)';
+        document.getElementById('uploadTab').style.borderBottom = 'none';
+        document.getElementById('uploadTab').style.color = '#64748b';
+    } else {
+        document.getElementById('uploadTab').style.borderBottom = '3px solid var(--primary-color)';
+        document.getElementById('uploadTab').style.color = 'var(--primary-color)';
+        document.getElementById('cameraTab').style.borderBottom = 'none';
+        document.getElementById('cameraTab').style.color = '#64748b';
+    }
+    
+    // Show/hide sections
+    document.getElementById('cameraSection').style.display = tab === 'camera' ? 'block' : 'none';
+    document.getElementById('uploadSection').style.display = tab === 'upload' ? 'block' : 'none';
+    
+    // Update form validation
+    if (tab === 'upload') {
+        document.getElementById('face_image').required = true;
+        stopCamera();
+    } else {
+        document.getElementById('face_image').required = false;
+    }
+}
+
+function startCamera() {
+    navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+        .then(stream => {
+            videoStream = stream;
+            const video = document.getElementById('cameraPreview');
+            video.srcObject = stream;
+            video.style.display = 'block';
+            
+            document.getElementById('cameraPlaceholder').style.display = 'none';
+            document.getElementById('startCameraBtn').style.display = 'none';
+            document.getElementById('captureBtn').style.display = 'inline-block';
+        })
+        .catch(error => {
+            alert('Unable to access camera: ' + error.message);
+            console.error('Camera error:', error);
+        });
+}
+
+function stopCamera() {
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+        const video = document.getElementById('cameraPreview');
+        video.style.display = 'none';
+        document.getElementById('cameraPlaceholder').style.display = 'flex';
+        document.getElementById('startCameraBtn').style.display = 'inline-block';
+        document.getElementById('captureBtn').style.display = 'none';
+    }
+}
+
+function capturePhoto() {
+    const video = document.getElementById('cameraPreview');
+    const canvas = document.getElementById('capturedCanvas');
+    const context = canvas.getContext('2d');
+    
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Draw video frame to canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Convert to base64 and store
+    const imageData = canvas.toDataURL('image/jpeg', 0.95);
+    document.getElementById('capturedImageData').value = imageData;
+    
+    // Show captured image
+    canvas.style.display = 'block';
+    video.style.display = 'none';
+    
+    // Update buttons
+    document.getElementById('captureBtn').style.display = 'none';
+    document.getElementById('retakeBtn').style.display = 'inline-block';
+    
+    // Stop camera
+    stopCamera();
+}
+
+function retakePhoto() {
+    const canvas = document.getElementById('capturedCanvas');
+    canvas.style.display = 'none';
+    document.getElementById('capturedImageData').value = '';
+    document.getElementById('retakeBtn').style.display = 'none';
+    startCamera();
+}
+
+// Form validation
+document.getElementById('registrationForm').addEventListener('submit', function(e) {
+    const studentId = document.getElementById('student_id').value;
+    
+    if (!studentId) {
+        e.preventDefault();
+        alert('Please select a student first!');
+        return false;
+    }
+    
+    if (currentTab === 'camera') {
+        const capturedData = document.getElementById('capturedImageData').value;
+        if (!capturedData) {
+            e.preventDefault();
+            alert('Please capture a photo using the camera first!');
+            return false;
+        }
+        // Disable the file upload field when using camera
+        document.getElementById('face_image').disabled = true;
+    } else {
+        const fileInput = document.getElementById('face_image');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            e.preventDefault();
+            alert('Please select an image file to upload!');
+            return false;
+        }
+        // Clear captured image data when using file upload
+        document.getElementById('capturedImageData').value = '';
+    }
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    stopCamera();
+});
+</script>
+
+<style>
+.tab-button {
+    transition: all 0.3s ease;
+}
+.tab-button:hover {
+    color: var(--primary-color) !important;
+}
+</style>
+{% endblock %}

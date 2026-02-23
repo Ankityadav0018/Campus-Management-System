@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition Attendance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Face Recognition Attendance</h1>
+        <a href="{{ url_for('index') }}" class="button back-button">Back to Homepage</a>
+
+        <p>Starting face recognition stream. Look at the camera to mark your attendance.</p>
+        <img src="{{ url_for('video_feed') }}" width="640" height="480" autoplay>
+
+        <div id="attendance_status">
+            <!-- Attendance updates will be displayed here via JavaScript if implemented -->
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>➕ Add Menu Item</h2>
+    <p>Add a new food item to {{ stall.name }}</p>
+</div>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="user-icon">🍽️</div>
+            <h2>Item Details</h2>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">Item Name *</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <span style="color: red; font-size: 0.9rem;">{{ form.name.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label for="{{ form.category.id_for_label }}">Category *</label>
+                    {{ form.category }}
+                </div>
+                <div>
+                    <label for="{{ form.price.id_for_label }}">Price ($) *</label>
+                    {{ form.price }}
+                </div>
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label for="{{ form.preparation_time.id_for_label }}">Prep Time (min)</label>
+                    {{ form.preparation_time }}
+                </div>
+                <div>
+                    <label for="{{ form.image.id_for_label }}">Image</label>
+                    {{ form.image }}
+                </div>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                {{ form.available }}
+                <label for="{{ form.available.id_for_label }}" style="margin: 0;">Available for order</label>
+            </div>
+
+            <button type="submit" class="btn-login">Add Item</button>
+        </form>
+
+        <div class="form-footer">
+            <a href="{% url 'food:manage_menu' stall.id %}">← Back to Menu</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

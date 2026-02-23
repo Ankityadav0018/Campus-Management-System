@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>📅 Event Management</h2>
+    <p>View and manage all campus events</p>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>🎉 All Events</h3>
+        <a href="{% url 'resources:add_event' %}" class="btn btn-primary">
+            ➕ Schedule New Event
+        </a>
+    </div>
+
+    {% if events %}
+    <div style="padding: 2rem;">
+        {% for event in events %}
+        <div class="stat-card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--primary-color);">
+            <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 1rem;">
+                <div style="flex: 1;">
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">
+                        {{ event.name }}
+                    </h3>
+                    {% if event.description %}
+                    <p style="color: #64748b; margin-bottom: 1rem;">{{ event.description }}</p>
+                    {% endif %}
+                </div>
+                <span class="badge badge-active">Scheduled</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div style="padding: 0.75rem; background: #f1f5f9; border-radius: 8px;">
+                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem;">Start Time</div>
+                    <div style="font-weight: 600; color: #1e293b;">
+                        📅 {{ event.start_time|date:"M d, Y h:i A" }}
+                    </div>
+                </div>
+                <div style="padding: 0.75rem; background: #f1f5f9; border-radius: 8px;">
+                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem;">End Time</div>
+                    <div style="font-weight: 600; color: #1e293b;">
+                        📅 {{ event.end_time|date:"M d, Y h:i A" }}
+                    </div>
+                </div>
+                <div style="padding: 0.75rem; background: #f1f5f9; border-radius: 8px;">
+                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.25rem;">Organizer</div>
+                    <div style="font-weight: 600; color: #1e293b;">
+                        👤 {{ event.organizer|default:"Not Specified" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="padding: 4rem 2rem; text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;">📅</div>
+        <h3 style="color: #64748b;">No Events Scheduled</h3>
+        <p style="color: #94a3b8; margin-bottom: 2rem;">Start by scheduling your first campus event</p>
+        <a href="{% url 'resources:add_event' %}" class="btn-login" style="display: inline-block; text-decoration: none;">
+            ➕ Schedule First Event
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

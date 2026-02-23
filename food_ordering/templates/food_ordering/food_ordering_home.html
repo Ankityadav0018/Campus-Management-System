@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Food Stall Pre-Ordering System</h2>
+    <p>This section will handle food pre-ordering for students.</p>
+
+    <h3>Available Food Items</h3>
+    <div class="food-items-container">
+        {% if food_items %}
+            <ul>
+                {% for item in food_items %}
+                    <li>
+                        <h4>{{ item.name }} - ₹{{ item.price }}</h4>
+                        <p>{{ item.description }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No food items available at the moment.</p>
+        {% endif %}
+    </div>
+
+    <p><a href="{% url 'place_order' %}" class="form-button">Place a New Order</a></p>
+    <p><a href="{% url 'rush_prediction' %}" class="form-button" style="background-color: #f39c12;">View Rush Hour Predictions</a></p>
+    <!-- Add food ordering features here -->
+{% endblock %}

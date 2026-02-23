@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🍕 Campus Cafeteria Menu</h2>
+    <p>Browse all available food items and prices</p>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>Available Items</h3>
+        <a href="{% url 'food:place_order' %}" class="btn btn-primary">Place Order</a>
+    </div>
+    
+    {% if available_items %}
+    <div class="dashboard-grid" style="padding: 2rem;">
+        {% for item in available_items %}
+        <div class="dashboard-card">
+            <div class="card-icon">🍽️</div>
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.description }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <span style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">${{ item.price }}</span>
+                <span class="badge badge-active">Available</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 3rem;">
+        <p style="font-size: 1.2rem; color: var(--text-light);">No items available at the moment.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% if unavailable_items %}
+<div class="table-container" style="margin-top: 2rem;">
+    <div class="table-header">
+        <h3>Currently Unavailable</h3>
+    </div>
+    
+    <div class="dashboard-grid" style="padding: 2rem;">
+        {% for item in unavailable_items %}
+        <div class="dashboard-card" style="opacity: 0.6;">
+            <div class="card-icon">🍽️</div>
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.description }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <span style="font-size: 1.5rem; font-weight: bold; color: var(--text-light);">${{ item.price }}</span>
+                <span class="badge" style="background: #fee2e2; color: #991b1b;">Out of Stock</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

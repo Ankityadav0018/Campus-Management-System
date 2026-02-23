@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="form-container">
+        <h2>Suggest Free Classrooms</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_start_time">Start Time:</label>
+                <input type="datetime-local" id="id_start_time" name="start_time" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="id_end_time">End Time:</label>
+                <input type="datetime-local" id="id_end_time" name="end_time" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="id_capacity_needed">Capacity Needed:</label>
+                <input type="number" id="id_capacity_needed" name="capacity_needed" class="form-control" min="0" value="0">
+            </div>
+            <button type="submit" class="form-button">Suggest Classrooms</button>
+        </form>
+
+        {% if suggested_classrooms %}
+            <h3 style="margin-top: 30px; text-align: center; color: var(--primary-color);">Available Classrooms:</h3>
+            <ul style="list-style: none; padding: 0;">
+                {% for classroom in suggested_classrooms %}
+                    <li style="background-color: #e8f5e9; padding: 10px; margin-bottom: 10px; border-radius: var(--border-radius); box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        Block: {{ classroom.block.name }}, Room: {{ classroom.room_number }}, Capacity: {{ classroom.capacity }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% elif request.method == 'POST' and not messages %}
+            <p style="text-align: center; margin-top: 30px; color: var(--text-color);">No classrooms available for the selected time and capacity.</p>
+        {% endif %}
+    </div>
+{% endblock %}

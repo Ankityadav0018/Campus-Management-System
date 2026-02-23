@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Faculty List</h2>
+    <p>List of all registered faculty members.</p>
+
+    {% if faculty_members %}
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for faculty in faculty_members %}
+                <tr>
+                    <td>{{ faculty.get_full_name|default:faculty.username }}</td>
+                    <td>{{ faculty.email }}</td>
+                    <td>{% if faculty.campusfaculty %}{{ faculty.campusfaculty.department }}{% else %}N/A{% endif %}</td>
+                    <td>
+                        <a href="#" class="form-button">Edit Details</a>
+                        <a href="#" class="form-button" style="background-color: #e74c3c;">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No faculty members found.</p>
+    {% endif %}
+{% endblock %}

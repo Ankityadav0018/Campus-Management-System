@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>📋 My Attendance History</h2>
+    <p>View all attendance records you have marked</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ total_records }}</div>
+        <div class="stat-label">Total Records</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ ai_records }}</div>
+        <div class="stat-label">AI Records</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ manual_records }}</div>
+        <div class="stat-label">Manual Records</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ remedial_records }}</div>
+        <div class="stat-label">Remedial Records</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ present_count }}</div>
+        <div class="stat-label">Present</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ absent_count }}</div>
+        <div class="stat-label">Absent</div>
+    </div>
+</div>
+
+<div class="table-container" style="margin-top: 2rem;">
+    <div class="table-header">
+        <h3>Attendance Records</h3>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <select id="courseFilter" onchange="filterRecords()" style="padding: 0.5rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+                <option value="all">All Courses</option>
+                {% for course in my_courses %}
+                <option value="{{ course.id }}" {% if course_filter == course.id|stringformat:"s" %}selected{% endif %}>{{ course.name }}</option>
+                {% endfor %}
+            </select>
+            <select id="modeFilter" onchange="filterRecords()" style="padding: 0.5rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+                <option value="all">All Modes</option>
+                <option value="AI" {% if mode_filter == 'AI' %}selected{% endif %}>AI</option>
+                <option value="manual" {% if mode_filter == 'manual' %}selected{% endif %}>Manual</option>
+                <option value="remedial" {% if mode_filter == 'remedial' %}selected{% endif %}>Remedial</option>
+            </select>
+            <select id="statusFilter" onchange="filterRecords()" style="padding: 0.5rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+                <option value="all">All Status</option>
+                <option value="present" {% if status_filter == 'present' %}selected{% endif %}>Present</option>
+                <option value="absent" {% if status_filter == 'absent' %}selected{% endif %}>Absent</option>
+            </select>
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Mode</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record.student.name }}</td>
+                <td>{{ record.course.name|default:"N/A" }}</td>
+                <td>{{ record.class_date }}</td>
+                <td>{{ record.class_time|default:"N/A" }}</td>
+                <td>
+                    {% if record.status == 'present' %}
+                        <span class="badge badge-active">Present</span>
+                    {% else %}
+                        <span class="badge" style="background: #fee2e2; color: #991b1b;">Absent</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record.mode == 'AI' %}
+                        <span class="badge" style="background: #dbeafe; color: #1e40af;">🤖 AI</span>
+                    {% elif record.mode == 'manual' %}
+                        <span class="badge" style="background: #f3f4f6; color: #374151;">✍️ Manual</span>
+                    {% else %}
+                        <span class="badge" style="background: #fef3c7; color: #92400e;">📚 Remedial</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem;">No attendance records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function filterRecords() {
+    const course = document.getElementById('courseFilter').value;
+    const mode = document.getElementById('modeFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    
+    const params = new URLSearchParams();
+    if (course !== 'all') params.append('course', course);
+    if (mode !== 'all') params.append('mode', mode);
+    if (status !== 'all') params.append('status', status);
+    
+    window.location.href = '{% url "attendance:faculty_attendance_history" %}?' + params.toString();
+}
+</script>
+{% endblock %}

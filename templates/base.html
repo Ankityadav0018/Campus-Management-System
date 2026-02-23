@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LPU Campus Management System{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <h1>🎓 LPU Campus Management System</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">🏠 Home</a></li>
+                {% if user.is_authenticated %}
+                    {% if user.role == 'student' %}
+                        <li><a href="{% url 'users:student_home' %}">👨‍🎓 My Dashboard</a></li>
+                        <li><a href="{% url 'food:food_ordering_home' %}">🍽️ Food</a></li>
+                    {% elif user.role == 'faculty' %}
+                        <li><a href="{% url 'users:faculty_home' %}">👨‍🏫 My Dashboard</a></li>
+                        <li><a href="{% url 'attendance:mark_attendance' %}">✓ Mark Attendance</a></li>
+                        <li><a href="{% url 'users:all_students_data' %}">👥 Students</a></li>
+                        <li><a href="{% url 'resources:resources_home' %}">📚 Resources</a></li>
+                        <li><a href="{% url 'remedial:remedial_home' %}">🎯 Remedial</a></li>
+                        <li><a href="{% url 'food:food_ordering_home' %}">🍽️ Food</a></li>
+                        <li><a href="{% url 'attendance:faculty_attendance_history' %}">📊 My Attendance</a></li>
+                    {% elif user.role == 'vendor' %}
+                        <li><a href="{% url 'users:vendor_home' %}">🍽️ Vendor Dashboard</a></li>
+                        <li><a href="{% url 'food:menu' %}">📋 Menu</a></li>
+                    {% else %}
+                        <li><a href="{% url 'food:food_ordering_home' %}">🍽️ Food</a></li>
+                        <li><a href="{% url 'attendance:attendance_home' %}">📊 Attendance</a></li>
+                        <li><a href="{% url 'resources:resources_home' %}">📚 Resources</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'users:logout' %}">🚪 Logout ({{ user.email }})</a></li>
+                {% else %}
+                    <li><a href="{% url 'users:login' %}">🔐 Login</a></li>
+                    <li><a href="{% url 'users:register' %}">📝 Register</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Messages Display -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <strong>
+                {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✗{% else %}ℹ{% endif %}
+            </strong>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2026 LPU Campus Management System | Built with ❤️ for Smart Education</p>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}?v=2.0"></script>
+    <script src="{% static 'js/form-handler.js' %}?v=2.0"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

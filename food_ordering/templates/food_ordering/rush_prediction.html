@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="form-container">
+        <h2>Food Stall Rush Hour Prediction</h2>
+
+        <h3>Hourly Demand Overview</h3>
+        {% if hourly_demand %}
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Hour of Day</th>
+                        <th>Total Orders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in hourly_demand %}
+                        <tr>
+                            <td>{{ entry.hour }}:00 - {{ entry.hour|add:1 }}:00</td>
+                            <td>{{ entry.total_orders }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="text-align: center;">No hourly demand data available.</p>
+        {% endif %}
+
+        <h3 style="margin-top: 30px;">Daily Demand Overview</h3>
+        {% if daily_demand %}
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Day of Week</th>
+                        <th>Total Orders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in daily_demand %}
+                        <tr>
+                            <td>{{ entry.weekday_name }}</td>
+                            <td>{{ entry.total_orders }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="text-align: center;">No daily demand data available.</p>
+        {% endif %}
+    </div>
+{% endblock %}

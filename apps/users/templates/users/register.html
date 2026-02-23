@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - LPU Campus{% endblock %}
+
+{% block extra_css %}
+<style>
+    .password-strength {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .strength-weak {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .strength-medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .strength-strong {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .password-requirements {
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        font-size: 0.8rem;
+    }
+    
+    .requirement {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.3rem;
+        color: var(--text-light);
+        transition: all 0.3s ease;
+    }
+    
+    .requirement.met {
+        color: var(--success);
+    }
+    
+    .error-message {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .input-valid {
+        border-color: var(--success) !important;
+    }
+    
+    .input-invalid {
+        border-color: var(--danger) !important;
+    }
+    
+    .student-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff;
+        padding: 0.5rem 1.2rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="user-icon">🎓</div>
+            <h2>Student Registration</h2>
+            <p>Create your LPU Campus student account</p>
+        </div>
+
+        <!-- Role badge — students only -->
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <span class="student-badge">👨‍🎓 Registering as Student</span>
+        </div>
+
+        {% if messages %}
+        <div style="margin-bottom: 1.5rem;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    <strong>
+                        {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✗{% else %}ℹ{% endif %}
+                    </strong>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" id="registrationForm" novalidate>
+            {% csrf_token %}
+            {{ form.role }} {# hidden field #}
+
+            <!-- First name -->
+            <div class="form-group">
+                <label for="{{ form.first_name.id_for_label }}">
+                    First Name <span style="color: var(--danger);">*</span>
+                </label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    {{ form.first_name }}
+                </div>
+                {% for error in form.first_name.errors %}
+                <div class="error-message"><span>⚠️</span><span>{{ error }}</span></div>
+                {% endfor %}
+            </div>
+
+            <!-- Last name -->
+            <div class="form-group">
+                <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    {{ form.last_name }}
+                </div>
+                {% for error in form.last_name.errors %}
+                <div class="error-message"><span>⚠️</span><span>{{ error }}</span></div>
+                {% endfor %}
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">
+                    Email Address <span style="color: var(--danger);">*</span>
+                </label>
+                <div class="input-wrapper">
+                    <span class="input-icon">📧</span>
+                    {{ form.email }}
+                </div>
+                {% for error in form.email.errors %}
+                <div class="error-message"><span>⚠️</span><span>{{ error }}</span></div>
+                {% endfor %}
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}">
+                    Password <span style="color: var(--danger);">*</span>
+                </label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    {{ form.password1 }}
+                </div>
+                <div id="passwordStrength" class="password-strength" style="display: none;"></div>
+                <div class="password-requirements">
+                    <div class="requirement" id="req-length">
+                        <span class="icon">○</span>
+                        <span>At least 8 characters</span>
+                    </div>
+                    <div class="requirement" id="req-uppercase">
+                        <span class="icon">○</span>
+                        <span>One uppercase letter</span>
+                    </div>
+                    <div class="requirement" id="req-lowercase">
+                        <span class="icon">○</span>
+                        <span>One lowercase letter</span>
+                    </div>
+                    <div class="requirement" id="req-number">
+                        <span class="icon">○</span>
+                        <span>One number</span>
+                    </div>
+                </div>
+                {% for error in form.password1.errors %}
+                <div class="error-message"><span>⚠️</span><span>{{ error }}</span></div>
+                {% endfor %}
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}">
+                    Confirm Password <span style="color: var(--danger);">*</span>
+                </label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    {{ form.password2 }}
+                </div>
+                {% for error in form.password2.errors %}
+                <div class="error-message"><span>⚠️</span><span>{{ error }}</span></div>
+                {% endfor %}
+            </div>
+
+            <div class="alert alert-info" style="background: #dbeafe; color: #1e40af; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;">
+                ℹ️ After registration your <strong>Student ID</strong> will be shown on the next screen. Use it to log in and access your dashboard.
+            </div>
+
+            <button type="submit" class="btn-login" id="submitBtn">
+                ✨ Create Student Account
+            </button>
+        </form>
+
+        <div class="form-footer">
+            <p>Already have an account? <a href="{% url 'users:login' %}">Login here</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #64748b;">
+                Faculty or Vendor? Please contact the administrator for an account.
+            </p>
+            <p style="margin-top: 0.5rem;"><a href="{% url 'home' %}">← Back to Home</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Apply icon padding
+document.querySelectorAll('.input-wrapper input').forEach(inp => {
+    inp.style.paddingLeft = '3rem';
+});
+
+// Password strength
+const p1 = document.querySelector('input[name="password1"]');
+const p2 = document.querySelector('input[name="password2"]');
+const strengthDiv = document.getElementById('passwordStrength');
+
+function setReq(id, met) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('met', met);
+    el.querySelector('.icon').textContent = met ? '✓' : '○';
+}
+
+if (p1) {
+    p1.addEventListener('input', function() {
+        const v = this.value;
+        setReq('req-length',    v.length >= 8);
+        setReq('req-uppercase', /[A-Z]/.test(v));
+        setReq('req-lowercase', /[a-z]/.test(v));
+        setReq('req-number',    /[0-9]/.test(v));
+        const score = [v.length>=8, /[A-Z]/.test(v), /[a-z]/.test(v), /[0-9]/.test(v)].filter(Boolean).length;
+        if (!v) { strengthDiv.style.display='none'; return; }
+        strengthDiv.style.display = 'block';
+        if (score <= 2) { strengthDiv.className='password-strength strength-weak';   strengthDiv.textContent='🔴 Weak'; }
+        else if (score === 3) { strengthDiv.className='password-strength strength-medium'; strengthDiv.textContent='🟡 Medium'; }
+        else { strengthDiv.className='password-strength strength-strong'; strengthDiv.textContent='🟢 Strong'; }
+    });
+}
+if (p2) {
+    p2.addEventListener('input', function() {
+        this.classList.toggle('input-valid',   !!this.value && this.value === p1?.value);
+        this.classList.toggle('input-invalid', !!this.value && this.value !== p1?.value);
+    });
+}
+
+// Submit guard
+document.getElementById('registrationForm').addEventListener('submit', function(e) {
+    if (p1 && p2 && p1.value !== p2.value) {
+        e.preventDefault();
+        alert('⚠️ Passwords do not match!');
+        p2.focus();
+        return;
+    }
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = '<span class="loading"></span> Creating account…';
+    btn.disabled = true;
+});
+</script>
+{% endblock %}

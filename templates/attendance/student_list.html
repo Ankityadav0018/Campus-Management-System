@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>👥 {% if is_faculty %}All Students{% else %}Student Directory{% endif %}</h2>
+    <p>{% if is_faculty %}Complete list of registered students with face registration status{% else %}View all registered students{% endif %}</p>
+</div>
+
+<div class="stats-grid" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-value">{{ students_with_faces|length }}</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{% for item in students_with_faces %}{% if item.has_face %}{{ forloop.counter }}{% endif %}{% endfor %}</div>
+        <div class="stat-label">Faces Registered</div>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>Student Directory</h3>
+        {% if is_faculty %}
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'attendance:register_face' %}" class="btn btn-success">📸 Register Face</a>
+            <a href="{% url 'attendance:add_student' %}" class="btn btn-primary">➕ Add Student</a>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if students_with_faces %}
+    <table>
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Face Status</th>
+                {% if is_faculty %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in students_with_faces %}
+            <tr>
+                <td><strong>{{ item.student.student_id }}</strong></td>
+                <td>{{ item.student.name }}</td>
+                <td>{{ item.student.email }}</td>
+                <td>
+                    {% if item.has_face %}
+                        <span class="badge badge-active">✅ Registered</span>
+                    {% else %}
+                        <span class="badge" style="background: #fee2e2; color: #991b1b;">❌ Not Registered</span>
+                    {% endif %}
+                </td>
+                {% if is_faculty %}
+                <td>
+                    {% if item.has_face %}
+                        <form method="POST" action="{% url 'attendance:delete_face' item.student.id %}" style="display: inline;" 
+                              onsubmit="return confirm('Are you sure you want to delete the registered face for {{ item.student.name }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                🗑️ Remove Face
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'attendance:register_face_student' item.student.id %}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            📸 Register Face
+                        </a>
+                    {% endif %}
+                    <form method="POST" action="{% url 'attendance:delete_student' item.student.id %}" style="display: inline; margin-left: 0.5rem;"
+                          onsubmit="return confirm('Are you sure you want to delete {{ item.student.name }}? This will also delete all attendance records.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            🗑️ Delete
+                        </button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align: center; padding: 3rem;">
+        <p style="font-size: 1.2rem; color: var(--text-light);">No students registered yet.</p>
+        {% if is_faculty %}
+        <a href="{% url 'attendance:add_student' %}" class="btn btn-primary" style="margin-top: 1rem;">Add First Student</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{% if is_faculty %}
+<div class="table-container" style="margin-top: 2rem;">
+    <div class="table-header">
+        <h3>💡 Quick Actions</h3>
+    </div>
+    <div style="padding: 2rem;">
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <div class="card-icon">📸</div>
+                <h3>Register Faces</h3>
+                <p>Upload photos to enable AI-powered attendance</p>
+                <a href="{% url 'attendance:register_face' %}" class="card-action">Get Started →</a>
+            </div>
+            <div class="dashboard-card">
+                <div class="card-icon">🎥</div>
+                <h3>Start Face Attendance</h3>
+                <p>Use webcam to automatically mark attendance</p>
+                <a href="{% url 'attendance:start_face_attendance' %}" class="card-action">Launch →</a>
+            </div>
+            <div class="dashboard-card">
+                <div class="card-icon">✍️</div>
+                <h3>Manual Attendance</h3>
+                <p>Mark attendance manually if needed</p>
+                <a href="{% url 'attendance:mark_attendance' %}" class="card-action">Mark Now →</a>
+            </div>
+            <div class="dashboard-card">
+                <div class="card-icon">📊</div>
+                <h3>View Summary</h3>
+                <p>Check attendance reports and statistics</p>
+                <a href="{% url 'attendance:attendance_summary' %}" class="card-action">View Report →</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

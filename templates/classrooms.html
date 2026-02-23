@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Classrooms</h1>
+        <a href="{{ url_for('add_classroom') }}" class="button">Add New Classroom</a>
+        <a href="{{ url_for('index') }}" class="button back-button">Back to Students</a>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% if classrooms %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Capacity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for classroom in classrooms %}
+                    <tr>
+                        <td>{{ classroom.id }}</td>
+                        <td>{{ classroom.name }}</td>
+                        <td>{{ classroom.capacity }}</td>
+                        <td>
+                            <a href="{{ url_for('edit_classroom', classroom_id=classroom.id) }}" class="button">Edit</a>
+                            <form action="{{ url_for('delete_classroom', classroom_id=classroom.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="button back-button">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No classrooms found. Add one!</p>
+        {% endif %}
+    </div>
+</body>
+</html>

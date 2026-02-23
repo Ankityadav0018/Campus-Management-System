@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Campus Resources{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>📚 Campus Resource Management</h2>
+    <p>Manage classrooms, courses, events and optimize resource allocation</p>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <div class="card-icon">🏫</div>
+        <h3>Manage Classrooms</h3>
+        <p>View and manage all campus classrooms and their schedules</p>
+        <a href="{% url 'resources:campus_classroom_list' %}" class="card-action">View Classrooms →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📖</div>
+        <h3>Manage Courses</h3>
+        <p>Add, edit and organize course offerings</p>
+        <a href="{% url 'resources:course_list' %}" class="card-action">View Courses →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">📅</div>
+        <h3>Campus Events</h3>
+        <p>Schedule and manage campus events and activities</p>
+        <a href="{% url 'resources:event_list' %}" class="card-action">View Events →</a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon">🔍</div>
+        <h3>Find Free Classrooms</h3>
+        <p>AI-powered suggestions for available classrooms</p>
+        <a href="{% url 'resources:suggest_classrooms' %}" class="card-action">Find Now →</a>
+    </div>
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{% url 'home' %}" class="btn btn-secondary">← Back to Home</a>
+</div>
+{% endblock %}

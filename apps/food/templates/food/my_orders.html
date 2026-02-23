@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders - Food Ordering{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>📋 My Orders</h2>
+    <p>View your order history and track current orders</p>
+</div>
+
+{% if orders %}
+<div class="table-container">
+    <div class="table-header">
+        <h3>Order History</h3>
+        <a href="{% url 'food:place_order' %}" class="btn btn-primary">+ New Order</a>
+    </div>
+    
+    <div class="search-container">
+        <input type="text" id="orderSearch" class="search-box" placeholder="🔍 Search orders..." onkeyup="searchOrders()">
+    </div>
+
+    <table id="ordersTable">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Student</th>
+                <th>Items</th>
+                <th>Pickup Time</th>
+                <th>Total Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td><strong>#{{ order.order_id }}</strong></td>
+                <td>{{ order.student.name|default:order.student.email }}</td>
+                <td>
+                    <ul style="margin: 0; padding-left: 1.2rem;">
+                        {% for item in order.foodorderitem_set.all %}
+                        <li>{{ item.food_item.name }} (x{{ item.quantity }})</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>{{ order.time_slot|date:"M d, Y - h:i A" }}</td>
+                <td><strong>₹{{ order.total_price|floatformat:2 }}</strong></td>
+                <td>
+                    {% if order.status == 'pending' %}
+                        <span class="badge" style="background: #fef3c7; color: #92400e;">⏳ Pending</span>
+                    {% elif order.status == 'confirmed' %}
+                        <span class="badge" style="background: #dbeafe; color: #1e40af;">✓ Confirmed</span>
+                    {% elif order.status == 'ready' %}
+                        <span class="badge badge-active">🍽️ Ready</span>
+                    {% elif order.status == 'completed' %}
+                        <span class="badge" style="background: #d1fae5; color: #065f46;">✅ Completed</span>
+                    {% elif order.status == 'cancelled' %}
+                        <span class="badge" style="background: #fee2e2; color: #991b1b;">❌ Cancelled</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="#" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;" 
+                       onclick="alert('Order details: #{{ order.order_id }}'); return false;">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="table-container" style="text-align: center; padding: 3rem;">
+    <div style="font-size: 4rem; margin-bottom: 1rem;">📋</div>
+    <h3 style="color: var(--text-light); margin-bottom: 1rem;">No orders yet</h3>
+    <p style="color: var(--text-light); margin-bottom: 2rem;">Start by placing your first order!</p>
+    <a href="{% url 'food:place_order' %}" class="btn btn-primary">Place Your First Order</a>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{% url 'food:food_ordering_home' %}" class="btn btn-secondary">← Back to Food Home</a>
+</div>
+
+<script>
+function searchOrders() {
+    const input = document.getElementById('orderSearch');
+    const filter = input.value.toLowerCase();
+    const table = document.getElementById('ordersTable');
+    const rows = table.getElementsByTagName('tr');
+    
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const cells = row.getElementsByTagName('td');
+        let found = false;
+        
+        for (let j = 0; j < cells.length; j++) {
+            if (cells[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                found = true;
+                break;
+            }
+        }
+        
+        row.style.display = found ? '' : 'none';
+    }
+}
+</script>
+{% endblock %}

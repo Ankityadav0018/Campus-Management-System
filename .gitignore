@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Django
+db.sqlite3
+*.log
+local_settings.py
+media/
+staticfiles/
+
+# Environment
+.env
+.venv
+venv/
+env/
+ENV/
+
+# macOS
+.DS_Store
+
+# Logs
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# Migrations (optional - keeping them for DB structure)
+# */migrations/*.py
+

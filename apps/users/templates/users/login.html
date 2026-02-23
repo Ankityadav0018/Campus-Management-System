@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - LPU Campus{% endblock %}
+
+{% block extra_css %}
+<style>
+    .input-valid {
+        border-color: var(--success) !important;
+    }
+    
+    .input-invalid {
+        border-color: var(--danger) !important;
+    }
+    
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 1.2rem;
+        user-select: none;
+        z-index: 10;
+    }
+    
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .remember-me input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+        cursor: pointer;
+        transform: scale(1.2);
+    }
+    
+    .btn-login {
+        position: relative;
+        z-index: 10;
+        pointer-events: auto !important;
+        cursor: pointer !important;
+    }
+    
+    .btn-login:disabled {
+        opacity: 0.7;
+        cursor: not-allowed !important;
+    }
+    
+    .form-group {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .login-header {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .form-footer {
+        position: relative;
+        z-index: 1;
+    }
+    
+    form {
+        position: relative;
+        z-index: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="user-icon">🔐</div>
+            <h2>Welcome Back!</h2>
+            <p>Login to access LPU Campus Management System</p>
+        </div>
+
+        {% if messages %}
+        <div style="margin-bottom: 1.5rem;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    <strong>
+                        {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✗{% else %}ℹ{% endif %}
+                    </strong>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" id="loginForm">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        <span style="color: var(--danger);">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {% if 'username' in field.name or 'email' in field.name %}
+                            <span class="input-icon">📧</span>
+                        {% elif 'password' in field.name %}
+                            <span class="input-icon">🔒</span>
+                            <span class="password-toggle" onclick="togglePassword('{{ field.id_for_label }}')">👁️</span>
+                        {% endif %}
+                        {{ field }}
+                    </div>
+                    
+                    {% for error in field.errors %}
+                        <div class="error-message" style="color: var(--danger); font-size: 0.85rem; margin-top: 0.3rem;">
+                            <span>⚠️</span>
+                            <span>{{ error }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe" name="remember_me">
+                <label for="rememberMe" style="margin: 0; font-weight: normal; cursor: pointer;">Remember me</label>
+            </div>
+            
+            <button type="submit" class="btn-login" id="submitBtn">
+                🚀 Login
+            </button>
+        </form>
+
+        <div class="form-footer">
+            <p>Don't have an account? <a href="{% url 'users:register' %}">Register here</a></p>
+            <p style="margin-top: 0.5rem;">
+                <a href="{% url 'users:password_reset' %}" style="font-size: 0.9rem;">
+                    Forgot Password?
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+console.log('Login page script loaded');
+
+// Add padding for icons
+document.querySelectorAll('.form-group input').forEach(input => {
+    if (input.closest('.input-wrapper')?.querySelector('.input-icon')) {
+        input.style.paddingLeft = '3rem';
+    }
+    if (input.type === 'password' && input.closest('.input-wrapper')?.querySelector('.password-toggle')) {
+        input.style.paddingRight = '3rem';
+    }
+});
+
+// Password toggle function
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const toggle = field?.parentElement.querySelector('.password-toggle');
+    
+    if (field) {
+        if (field.type === 'password') {
+            field.type = 'text';
+            if (toggle) toggle.textContent = '🙈';
+        } else {
+            field.type = 'password';
+            if (toggle) toggle.textContent = '👁️';
+        }
+    }
+}
+
+// Simple form submission handler
+const loginForm = document.getElementById('loginForm');
+const submitBtn = document.getElementById('submitBtn');
+
+console.log('Login form:', loginForm);
+console.log('Submit button:', submitBtn);
+
+if (loginForm && submitBtn) {
+    // Make sure button is clickable
+    submitBtn.style.pointerEvents = 'auto';
+    submitBtn.style.cursor = 'pointer';
+    
+    loginForm.addEventListener('submit', function(e) {
+        console.log('Form submit event triggered');
+        
+        // Don't prevent default - let the form submit
+        if (submitBtn) {
+            submitBtn.innerHTML = '<span class="loading"></span> Logging in...';
+            submitBtn.disabled = true;
+        }
+    });
+    
+    // Also add click handler as backup
+    submitBtn.addEventListener('click', function(e) {
+        console.log('Button clicked');
+    });
+}
+
+// Remember me functionality
+const rememberCheckbox = document.getElementById('rememberMe');
+const usernameField = document.querySelector('input[name="username"]');
+
+// Load saved email if exists
+if (localStorage.getItem('rememberedEmail') && usernameField) {
+    usernameField.value = localStorage.getItem('rememberedEmail');
+    if (rememberCheckbox) rememberCheckbox.checked = true;
+}
+
+// Save email on form submit
+if (loginForm && rememberCheckbox && usernameField) {
+    loginForm.addEventListener('submit', function() {
+        if (rememberCheckbox.checked) {
+            localStorage.setItem('rememberedEmail', usernameField.value);
+        } else {
+            localStorage.removeItem('rememberedEmail');
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>📋 Attendance History & Records</h2>
+    <p>View detailed attendance records with filtering options</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 2rem;">
+    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="stat-value">{{ total_records }}</div>
+        <div class="stat-label">Total Records</div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="stat-value">{{ ai_records }}</div>
+        <div class="stat-label">🤖 AI Recognition</div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+        <div class="stat-value">{{ manual_records }}</div>
+        <div class="stat-label">📝 Manual Entry</div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+        <div class="stat-value">{{ remedial_records }}</div>
+        <div class="stat-label">🔄 Remedial</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="table-container" style="margin-bottom: 2rem;">
+    <div class="table-header">
+        <h3>🔍 Filter Records</h3>
+    </div>
+    <div style="padding: 1.5rem;">
+        <form method="get" action="{% url 'attendance:attendance_records' %}" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end;">
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #1e293b;">Attendance Mode</label>
+                <select name="mode" class="form-control" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+                    <option value="all" {% if mode_filter == 'all' %}selected{% endif %}>All Modes</option>
+                    <option value="AI" {% if mode_filter == 'AI' %}selected{% endif %}>🤖 AI Recognition Only</option>
+                    <option value="manual" {% if mode_filter == 'manual' %}selected{% endif %}>📝 Manual Entry Only</option>
+                    <option value="remedial" {% if mode_filter == 'remedial' %}selected{% endif %}>🔄 Remedial Only</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #1e293b;">Status</label>
+                <select name="status" class="form-control" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                    <option value="present" {% if status_filter == 'present' %}selected{% endif %}>✅ Present Only</option>
+                    <option value="absent" {% if status_filter == 'absent' %}selected{% endif %}>❌ Absent Only</option>
+                </select>
+            </div>
+            
+            <div>
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">
+                    Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Records Table -->
+<div class="table-container">
+    <div class="table-header">
+        <h3>📊 Attendance Records ({{ records|length }} shown)</h3>
+        <a href="{% url 'attendance:attendance_records' %}" class="btn btn-secondary">Clear Filters</a>
+    </div>
+    
+    {% if records %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 10;">
+                <tr>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;">#</th>
+                    {% if not is_student %}
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;">Student</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;">Student ID</th>
+                    {% endif %}
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;">Faculty</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;">Course</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;">Date</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;">Time</th>
+                    <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #cbd5e1;">Status</th>
+                    <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #cbd5e1;">Mode</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.2s;" 
+                    onmouseover="this.style.background='#f8fafc'" 
+                    onmouseout="this.style.background='white'">
+                    <td style="padding: 1rem; font-weight: 600; color: #64748b;">{{ forloop.counter }}</td>
+                    
+                    {% if not is_student %}
+                    <td style="padding: 1rem; font-weight: 600;">{{ record.student.name }}</td>
+                    <td style="padding: 1rem; color: #64748b;">{{ record.student.student_id }}</td>
+                    {% endif %}
+                    
+                    <td style="padding: 1rem;">{{ record.faculty.name }}</td>
+                    <td style="padding: 1rem;">
+                        {% if record.course %}
+                            {{ record.course.name }}
+                        {% else %}
+                            <span style="color: #94a3b8;">Not specified</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem;">{{ record.class_date|date:"d M Y" }}</td>
+                    <td style="padding: 1rem;">{{ record.class_time|default:"--:--" }}</td>
+                    
+                    <td style="padding: 1rem; text-align: center;">
+                        {% if record.status == 'present' %}
+                            <span class="badge badge-active" style="background: #10b981; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600;">
+                                ✅ Present
+                            </span>
+                        {% else %}
+                            <span class="badge" style="background: #ef4444; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; color: white;">
+                                ❌ Absent
+                            </span>
+                        {% endif %}
+                    </td>
+                    
+                    <td style="padding: 1rem; text-align: center;">
+                        {% if record.mode == 'AI' %}
+                            <span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; color: white; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">
+                                🤖 AI Recognition
+                            </span>
+                        {% elif record.mode == 'manual' %}
+                            <span class="badge" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; color: white; box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);">
+                                📝 Manual Entry
+                            </span>
+                        {% elif record.mode == 'remedial' %}
+                            <span class="badge" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; color: white; box-shadow: 0 2px 8px rgba(67, 233, 123, 0.3);">
+                                🔄 Remedial Class
+                            </span>
+                        {% else %}
+                            <span class="badge" style="background: #94a3b8; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; color: white;">
+                                {{ record.mode }}
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="padding: 4rem; text-align: center; color: #94a3b8;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
+        <h3 style="color: #64748b; margin-bottom: 0.5rem;">No Records Found</h3>
+        <p>No attendance records match your current filters.</p>
+        {% if mode_filter != 'all' or status_filter != 'all' %}
+        <a href="{% url 'attendance:attendance_records' %}" class="btn btn-primary" style="margin-top: 1rem;">
+            Clear Filters
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{% url 'attendance:attendance_home' %}" class="btn btn-secondary">← Back to Attendance Home</a>
+</div>
+
+<style>
+.stat-card {
+    padding: 2rem;
+    border-radius: 16px;
+    color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.95rem;
+    opacity: 0.95;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+</style>
+{% endblock %}

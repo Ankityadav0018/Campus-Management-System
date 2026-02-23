@@ -1,0 +1,1043 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Food - Campus Cafeteria{% endblock %}
+
+{% block extra_css %}
+<style>
+.order-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.step-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.step-indicator::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e2e8f0;
+    z-index: -1;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s;
+}
+
+.step.active .step-number {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.step.completed .step-number {
+    background: #10b981;
+    color: white;
+}
+
+.step-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.stall-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stall-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 3px solid transparent;
+}
+
+.stall-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.stall-card.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+}
+
+.stall-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.stall-name {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.stall-description {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.stall-timing {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #10b981;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.menu-item {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+}
+
+.menu-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.item-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.item-details {
+    padding: 1rem;
+}
+
+.item-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.item-description {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+}
+
+.item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-price {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #10b981;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #f1f5f9;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.quantity-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #667eea;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.quantity-btn:hover {
+    background: #764ba2;
+    transform: scale(1.1);
+}
+
+.quantity-display {
+    min-width: 40px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.cart-summary {
+    position: sticky;
+    top: 20px;
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.cart-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #1e293b;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.cart-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #1e293b;
+    border-top: 2px solid #e2e8f0;
+    margin-top: 1rem;
+}
+
+.btn-place-order {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.3s;
+}
+
+.btn-place-order:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-place-order:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.time-slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.time-slot {
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+}
+
+.time-slot:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.time-slot.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: bold;
+}
+
+.empty-cart {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+}
+
+.section-content {
+    display: none;
+}
+
+.section-content.active {
+    display: block;
+}
+
+.category-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.category-tab {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 25px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 600;
+}
+
+.category-tab:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.category-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="order-container">
+    <div class="welcome-section">
+        <h2>🍽️ Order Your Meal</h2>
+        <p>Choose your favorite food from our campus cafeteria</p>
+    </div>
+
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+        <div class="step active" id="step-1">
+            <div class="step-number">1</div>
+            <div class="step-label">Select Stall</div>
+        </div>
+        <div class="step" id="step-2">
+            <div class="step-number">2</div>
+            <div class="step-label">Choose Items</div>
+        </div>
+        <div class="step" id="step-3">
+            <div class="step-number">3</div>
+            <div class="step-label">Pickup Time</div>
+        </div>
+        <div class="step" id="step-4">
+            <div class="step-number">4</div>
+            <div class="step-label">Payment</div>
+        </div>
+        <div class="step" id="step-5">
+            <div class="step-number">5</div>
+            <div class="step-label">Confirm</div>
+        </div>
+    </div>
+
+    <div class="row" style="display: grid; grid-template-columns: 1fr 350px; gap: 2rem;">
+        <!-- Main Content Area -->
+        <div>
+            <!-- Step 1: Select Stall -->
+            <div class="section-content active" id="section-1">
+                <h3 style="margin-bottom: 1.5rem; color: #1e293b;">🏪 Select a Food Stall</h3>
+                <div class="stall-grid">
+                    {% for stall in stalls %}
+                    <div class="stall-card" onclick="selectStall({{ stall.id }}, '{{ stall.name }}')" data-stall-id="{{ stall.id }}">
+                        <div class="stall-icon">🍽️</div>
+                        <div class="stall-name">{{ stall.name }}</div>
+                        <div class="stall-description">{{ stall.description|default:"Delicious food items" }}</div>
+                        {% if stall.opening_time and stall.closing_time %}
+                        <div class="stall-timing">
+                            ⏰ {{ stall.opening_time|date:"g:i A" }} - {{ stall.closing_time|date:"g:i A" }}
+                        </div>
+                        {% else %}
+                        <div class="stall-timing">
+                            ✅ Open Now
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #94a3b8;">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">🍽️</div>
+                        <h3>No Stalls Available</h3>
+                        <p>Food stalls are currently not available. Please check back later.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Step 2: Select Items -->
+            <div class="section-content" id="section-2">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="color: #1e293b; margin: 0;">🍔 Menu Items</h3>
+                    <button class="btn btn-secondary" onclick="goToStep(1)">← Change Stall</button>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="category-tabs" id="category-filter">
+                    <div class="category-tab active" onclick="filterByCategory('all')">All</div>
+                    <div class="category-tab" onclick="filterByCategory('breakfast')">🥞 Breakfast</div>
+                    <div class="category-tab" onclick="filterByCategory('lunch')">🍛 Lunch</div>
+                    <div class="category-tab" onclick="filterByCategory('snacks')">🍿 Snacks</div>
+                    <div class="category-tab" onclick="filterByCategory('beverages')">☕ Beverages</div>
+                    <div class="category-tab" onclick="filterByCategory('desserts')">🍰 Desserts</div>
+                </div>
+
+                <div class="menu-grid" id="menu-items-grid">
+                    <!-- Menu items will be loaded here via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Step 3: Select Time -->
+            <div class="section-content" id="section-3">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="color: #1e293b; margin: 0;">⏰ Select Pickup Time</h3>
+                    <button class="btn btn-secondary" onclick="goToStep(2)">← Back to Menu</button>
+                </div>
+
+                <div class="time-slot-grid">
+                    <div class="time-slot" onclick="selectTimeSlot('08:00-09:00', this)">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🌅</div>
+                        <div>8:00 - 9:00 AM</div>
+                    </div>
+                    <div class="time-slot" onclick="selectTimeSlot('09:00-10:00', this)">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">☀️</div>
+                        <div>9:00 - 10:00 AM</div>
+                    </div>
+                    <div class="time-slot" onclick="selectTimeSlot('10:00-11:00', this)">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">☀️</div>
+                        <div>10:00 - 11:00 AM</div>
+                    </div>
+                    <div class="time-slot" onclick="selectTimeSlot('11:00-12:00', this)">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🌤️</div>
+                        <div>11:00 AM - 12:00 PM</div>
+                    </div>
+                    <div class="time-slot" onclick="selectTimeSlot('12:00-13:00', this)">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🍽️</div>
+                        <div>12:00 - 1:00 PM</div>
+                    </div>
+                    <div class="time-slot" onclick="selectTimeSlot('13:00-14:00', this)">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🌞</div>
+                        <div>1:00 - 2:00 PM</div>
+                    </div>
+                    <div class="time-slot" onclick="selectTimeSlot('14:00-15:00', this)">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">☀️</div>
+                        <div>2:00 - 3:00 PM</div>
+                    </div>
+                    <div class="time-slot" onclick="selectTimeSlot('15:00-16:00', this)">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🌤️</div>
+                        <div>3:00 - 4:00 PM</div>
+                    </div>
+                    <div class="time-slot" onclick="selectTimeSlot('16:00-17:00', this)">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🌆</div>
+                        <div>4:00 - 5:00 PM</div>
+                    </div>
+                    <div class="time-slot" onclick="selectTimeSlot('17:00-18:00', this)">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🌇</div>
+                        <div>5:00 - 6:00 PM</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="goToStep(4)" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                    Continue to Payment Options →
+                </button>
+            </div>
+
+            <!-- Step 4: Payment Method -->
+            <div class="section-content" id="section-4">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="color: #1e293b; margin: 0;">💳 Select Payment Method</h3>
+                    <button class="btn btn-secondary" onclick="goToStep(3)">← Back to Time</button>
+                </div>
+
+                <div style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="color: #1e293b; margin-bottom: 1rem;">Order Summary</h4>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+                            <span style="color: #64748b;">Subtotal:</span>
+                            <span id="payment-subtotal" style="font-weight: bold;">₹0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+                            <span style="color: #64748b;">Tax (5%):</span>
+                            <span id="payment-tax" style="font-weight: bold;">₹0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 1rem 0; margin-top: 0.5rem; border-top: 2px solid #e2e8f0; font-size: 1.25rem;">
+                            <span style="font-weight: bold;">Total:</span>
+                            <span id="payment-total" style="font-weight: bold; color: #10b981;">₹0</span>
+                        </div>
+                    </div>
+
+                    <h4 style="color: #1e293b; margin-bottom: 1.5rem;">Choose Payment Method:</h4>
+
+                    <div style="display: grid; gap: 1rem; margin-bottom: 2rem;">
+                        <!-- Cash on Delivery -->
+                        <div class="payment-option" onclick="selectPaymentMethod('cod', this)" data-method="cod" 
+                             style="padding: 1.5rem; border: 3px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="font-size: 2.5rem;">💵</div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 1.1rem; font-weight: bold; color: #1e293b; margin-bottom: 0.25rem;">
+                                        Cash on Delivery
+                                    </div>
+                                    <div style="color: #64748b; font-size: 0.875rem;">
+                                        Pay with cash when you pick up your order
+                                    </div>
+                                </div>
+                                <div class="payment-checkmark" style="width: 24px; height: 24px; border: 2px solid #cbd5e1; border-radius: 50%; display: none;"></div>
+                            </div>
+                        </div>
+
+                        <!-- UPI/QR Code -->
+                        <div class="payment-option" onclick="selectPaymentMethod('qr', this)" data-method="qr"
+                             style="padding: 1.5rem; border: 3px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="font-size: 2.5rem;">📱</div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 1.1rem; font-weight: bold; color: #1e293b; margin-bottom: 0.25rem;">
+                                        UPI / QR Code Payment
+                                    </div>
+                                    <div style="color: #64748b; font-size: 0.875rem;">
+                                        Pay using PhonePe, Google Pay, Paytm, or any UPI app
+                                    </div>
+                                </div>
+                                <div class="payment-checkmark" style="width: 24px; height: 24px; border: 2px solid #cbd5e1; border-radius: 50%; display: none;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Debit/Credit Card -->
+                        <div class="payment-option" onclick="selectPaymentMethod('card', this)" data-method="card"
+                             style="padding: 1.5rem; border: 3px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="font-size: 2.5rem;">💳</div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 1.1rem; font-weight: bold; color: #1e293b; margin-bottom: 0.25rem;">
+                                        Debit / Credit Card
+                                    </div>
+                                    <div style="color: #64748b; font-size: 0.875rem;">
+                                        Secure payment via Visa, Mastercard, Rupay
+                                    </div>
+                                </div>
+                                <div class="payment-checkmark" style="width: 24px; height: 24px; border: 2px solid #cbd5e1; border-radius: 50%; display: none;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Campus Wallet -->
+                        <div class="payment-option" onclick="selectPaymentMethod('wallet', this)" data-method="wallet"
+                             style="padding: 1.5rem; border: 3px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="font-size: 2.5rem;">🏦</div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 1.1rem; font-weight: bold; color: #1e293b; margin-bottom: 0.25rem;">
+                                        Campus Wallet
+                                    </div>
+                                    <div style="color: #64748b; font-size: 0.875rem;">
+                                        Use your campus wallet balance
+                                        <span style="color: #10b981; font-weight: 600; margin-left: 0.5rem;">Balance: ₹500.00</span>
+                                    </div>
+                                </div>
+                                <div class="payment-checkmark" style="width: 24px; height: 24px; border: 2px solid #cbd5e1; border-radius: 50%; display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code Display (Initially Hidden) -->
+                    <div id="qr-code-section" style="display: none; text-align: center; padding: 2rem; background: #f8fafc; border-radius: 12px; margin-top: 1.5rem;">
+                        <h4 style="color: #1e293b; margin-bottom: 1rem;">Scan QR Code to Pay</h4>
+                        <div style="background: white; padding: 2rem; border-radius: 12px; display: inline-block; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="width: 200px; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
+                                📱
+                            </div>
+                            <p style="margin-top: 1rem; color: #64748b; font-size: 0.875rem;">
+                                Amount: <strong id="qr-amount">₹0</strong>
+                            </p>
+                        </div>
+                        <p style="margin-top: 1rem; color: #64748b;">
+                            Scan this QR code using any UPI app to complete payment
+                        </p>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="goToStep(5)" id="continue-to-confirm" disabled
+                            style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 1.5rem; opacity: 0.5; cursor: not-allowed;">
+                        Continue to Confirm Order →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 5: Confirm Order -->
+            <div class="section-content" id="section-5">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="color: #1e293b; margin: 0;">✅ Confirm Your Order</h3>
+                    <button class="btn btn-secondary" onclick="goToStep(4)">← Back to Payment</button>
+                </div>
+
+                <div style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span style="color: #64748b; font-weight: 600;">Stall:</span>
+                            <span id="confirm-stall" style="font-weight: bold;">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span style="color: #64748b; font-weight: 600;">Pickup Time:</span>
+                            <span id="confirm-time" style="font-weight: bold;">-</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #64748b; font-weight: 600;">Payment Method:</span>
+                            <span id="confirm-payment" style="font-weight: bold;">-</span>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-bottom: 1rem; color: #1e293b;">Your Items:</h4>
+                    <div id="confirm-items">
+                        <!-- Items will be listed here -->
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: #64748b;">Subtotal:</span>
+                            <span id="confirm-subtotal">₹0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: #64748b;">Tax (5%):</span>
+                            <span id="confirm-tax">₹0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: bold; color: #10b981; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #e2e8f0;">
+                            <span>Total:</span>
+                            <span id="confirm-total">₹0</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #1e293b;">
+                            Special Instructions (Optional):
+                        </label>
+                        <textarea id="special-instructions" rows="3" 
+                                  style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-family: inherit;"
+                                  placeholder="Any special requests? (e.g., less spicy, extra sauce)"></textarea>
+                    </div>
+
+                    <div style="background: #fef3c7; border: 2px solid #fbbf24; border-radius: 12px; padding: 1rem; margin-top: 1.5rem;">
+                        <div style="display: flex; align-items: start; gap: 0.75rem;">
+                            <div style="font-size: 1.5rem;">⚠️</div>
+                            <div style="flex: 1; color: #92400e;">
+                                <strong>Important:</strong> By placing this order, you agree to pick up your food at the selected time slot. 
+                                Cancellations are not allowed within 30 minutes of the pickup time.
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-place-order" onclick="submitOrder()">
+                        🎉 Place Order & Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Summary Sidebar -->
+        <div>
+            <div class="cart-summary">
+                <div class="cart-title">🛒 Your Cart</div>
+                <div id="cart-items">
+                    <div class="empty-cart">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🍽️</div>
+                        <p>Your cart is empty</p>
+                        <p style="font-size: 0.875rem;">Add items from the menu</p>
+                    </div>
+                </div>
+                <div class="cart-total" id="cart-total-section" style="display: none;">
+                    <span>Total:</span>
+                    <span id="cart-total">₹0</span>
+                </div>
+                
+                <!-- Continue Button (shown when cart has items) -->
+                <button class="btn-place-order" id="cart-continue-btn" onclick="proceedToNextStep()" style="display: none; margin-top: 1rem;">
+                    Continue to Next Step →
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedStall = null;
+let selectedStallName = '';
+let selectedTime = null;
+let selectedPaymentMethod = null;
+let cart = {};
+let menuItems = {{ food_items|safe }};
+
+function selectStall(stallId, stallName) {
+    selectedStall = stallId;
+    selectedStallName = stallName;
+    
+    // Update UI
+    document.querySelectorAll('.stall-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+    
+    // Load menu for this stall
+    loadMenuItems(stallId);
+    
+    // Move to next step
+    setTimeout(() => goToStep(2), 500);
+}
+
+function loadMenuItems(stallId) {
+    const grid = document.getElementById('menu-items-grid');
+    const items = menuItems.filter(item => item.stall_id === stallId && item.available);
+    
+    if (items.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #94a3b8;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🍽️</div>
+                <h3>No Items Available</h3>
+                <p>This stall currently has no items. Please select another stall.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    grid.innerHTML = items.map(item => `
+        <div class="menu-item" data-category="${item.category}">
+            <div class="item-image" style="${item.image ? `background: url('${item.image}') center/cover;` : ''}">
+                ${!item.image ? '<div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 3rem;">🍽️</div>' : ''}
+            </div>
+            <div class="item-details">
+                <div class="item-name">${item.name}</div>
+                <div class="item-description">${item.description || 'Delicious food item'}</div>
+                <div class="item-footer">
+                    <div class="item-price">₹${parseFloat(item.price).toFixed(2)}</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
+                        <span class="quantity-display" id="qty-${item.id}">0</span>
+                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateQuantity(itemId, change) {
+    const item = menuItems.find(i => i.id === itemId);
+    if (!item) return;
+    
+    if (!cart[itemId]) {
+        cart[itemId] = { ...item, quantity: 0 };
+    }
+    
+    cart[itemId].quantity = Math.max(0, cart[itemId].quantity + change);
+    
+    // Update display
+    document.getElementById(`qty-${itemId}`).textContent = cart[itemId].quantity;
+    
+    // If quantity is 0, remove from cart
+    if (cart[itemId].quantity === 0) {
+        delete cart[itemId];
+    }
+    
+    updateCartDisplay();
+}
+
+function updateCartDisplay() {
+    const cartItemsDiv = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    const cartTotalSection = document.getElementById('cart-total-section');
+    const cartContinueBtn = document.getElementById('cart-continue-btn');
+    
+    const items = Object.values(cart).filter(item => item.quantity > 0);
+    
+    if (items.length === 0) {
+        cartItemsDiv.innerHTML = `
+            <div class="empty-cart">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🍽️</div>
+                <p>Your cart is empty</p>
+                <p style="font-size: 0.875rem;">Add items from the menu</p>
+            </div>
+        `;
+        cartTotalSection.style.display = 'none';
+        cartContinueBtn.style.display = 'none';
+        return;
+    }
+    
+    let total = 0;
+    cartItemsDiv.innerHTML = items.map(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        return `
+            <div class="cart-item">
+                <div>
+                    <div style="font-weight: 600;">${item.name}</div>
+                    <div style="font-size: 0.875rem; color: #64748b;">${item.quantity} × ₹${parseFloat(item.price).toFixed(2)}</div>
+                </div>
+                <div style="font-weight: bold; color: #10b981;">₹${itemTotal.toFixed(2)}</div>
+            </div>
+        `;
+    }).join('');
+    
+    cartTotal.textContent = `₹${total.toFixed(2)}`;
+    cartTotalSection.style.display = 'flex';
+    cartContinueBtn.style.display = 'block';
+}
+
+function selectTimeSlot(time, element) {
+    selectedTime = time;
+    
+    document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.classList.remove('selected');
+    });
+    element.classList.add('selected');
+}
+
+function selectPaymentMethod(method, element) {
+    selectedPaymentMethod = method;
+    
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.style.borderColor = '#e2e8f0';
+        option.querySelector('.payment-checkmark').style.display = 'none';
+    });
+    element.style.borderColor = '#10b981';
+    element.querySelector('.payment-checkmark').style.display = 'block';
+    
+    // Show QR code section if UPI/QR is selected
+    const qrSection = document.getElementById('qr-code-section');
+    if (method === 'qr') {
+        qrSection.style.display = 'block';
+        document.getElementById('qr-amount').textContent = document.getElementById('payment-total').textContent;
+    } else {
+        qrSection.style.display = 'none';
+    }
+    
+    // Enable continue button
+    const continueButton = document.getElementById('continue-to-confirm');
+    continueButton.disabled = false;
+    continueButton.style.opacity = 1;
+    continueButton.style.cursor = 'pointer';
+}
+
+function proceedToNextStep() {
+    // Determine current step and proceed to next
+    const currentSection = document.querySelector('.section-content.active');
+    
+    if (currentSection.id === 'section-2') {
+        // Currently on menu items, go to time selection
+        goToStep(3);
+    } else if (currentSection.id === 'section-3') {
+        // Currently on time selection, go to payment
+        goToStep(4);
+    } else if (currentSection.id === 'section-4') {
+        // Currently on payment, go to confirmation
+        goToStep(5);
+    }
+}
+
+function filterByCategory(category) {
+    document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    document.querySelectorAll('.menu-item').forEach(item => {
+        if (category === 'all' || item.dataset.category === category) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function goToStep(stepNum) {
+    // Validation
+    if (stepNum === 2 && !selectedStall) {
+        alert('⚠️ Please select a stall first!');
+        return;
+    }
+    
+    if (stepNum === 3 && Object.keys(cart).length === 0) {
+        alert('⚠️ Please add at least one item to your cart!');
+        return;
+    }
+    
+    if (stepNum === 4 && !selectedTime) {
+        alert('⚠️ Please select a pickup time!');
+        return;
+    }
+    
+    if (stepNum === 5 && !selectedPaymentMethod) {
+        alert('⚠️ Please select a payment method!');
+        return;
+    }
+    
+    // Update step indicators
+    document.querySelectorAll('.step').forEach((step, index) => {
+        step.classList.remove('active', 'completed');
+        if (index + 1 < stepNum) {
+            step.classList.add('completed');
+        } else if (index + 1 === stepNum) {
+            step.classList.add('active');
+        }
+    });
+    
+    // Show/hide sections
+    document.querySelectorAll('.section-content').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.getElementById(`section-${stepNum}`).classList.add('active');
+    
+    // If going to step 4, populate payment summary
+    if (stepNum === 4) {
+        populatePaymentSummary();
+    }
+    
+    // If going to step 5, populate confirmation
+    if (stepNum === 5) {
+        populateConfirmation();
+    }
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function populatePaymentSummary() {
+    const items = Object.values(cart).filter(item => item.quantity > 0);
+    let subtotal = 0;
+    
+    items.forEach(item => {
+        subtotal += item.price * item.quantity;
+    });
+    
+    const tax = subtotal * 0.05;
+    const total = subtotal + tax;
+    
+    document.getElementById('payment-subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+    document.getElementById('payment-tax').textContent = `₹${tax.toFixed(2)}`;
+    document.getElementById('payment-total').textContent = `₹${total.toFixed(2)}`;
+}
+
+function populateConfirmation() {
+    document.getElementById('confirm-stall').textContent = selectedStallName;
+    document.getElementById('confirm-time').textContent = selectedTime;
+    document.getElementById('confirm-payment').textContent = selectedPaymentMethod === 'cod' ? 'Cash on Delivery' :
+        selectedPaymentMethod === 'qr' ? 'UPI / QR Code Payment' :
+        selectedPaymentMethod === 'card' ? 'Debit / Credit Card' :
+        'Campus Wallet';
+    
+    const items = Object.values(cart).filter(item => item.quantity > 0);
+    let subtotal = 0;
+    
+    const itemsHtml = items.map(item => {
+        const itemTotal = item.price * item.quantity;
+        subtotal += itemTotal;
+        return `
+            <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9;">
+                <div>
+                    <div style="font-weight: 600;">${item.name}</div>
+                    <div style="font-size: 0.875rem; color: #64748b;">${item.quantity} × ₹${parseFloat(item.price).toFixed(2)}</div>
+                </div>
+                <div style="font-weight: bold;">₹${itemTotal.toFixed(2)}</div>
+            </div>
+        `;
+    }).join('');
+    
+    const tax = subtotal * 0.05;
+    const total = subtotal + tax;
+    
+    document.getElementById('confirm-items').innerHTML = itemsHtml;
+    document.getElementById('confirm-subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+    document.getElementById('confirm-tax').textContent = `₹${tax.toFixed(2)}`;
+    document.getElementById('confirm-total').textContent = `₹${total.toFixed(2)}`;
+}
+
+function submitOrder() {
+    if (!selectedStall || !selectedTime || !selectedPaymentMethod || Object.keys(cart).length === 0) {
+        alert('⚠️ Please complete all steps before placing your order!');
+        return;
+    }
+    
+    const button = event.target;
+    button.disabled = true;
+    button.textContent = '⏳ Processing...';
+    
+    // Prepare order data
+    const orderData = {
+        stall: selectedStall,
+        pickup_time_slot: selectedTime,
+        payment_method: selectedPaymentMethod,
+        special_instructions: document.getElementById('special-instructions').value,
+        items: Object.values(cart).filter(item => item.quantity > 0).map(item => ({
+            food_item: item.id,
+            quantity: item.quantity
+        }))
+    };
+    
+    // Submit via form
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "food:place_order" %}';
+    
+    // Add CSRF token
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = '{{ csrf_token }}';
+    form.appendChild(csrfInput);
+    
+    // Add order data as JSON
+    const dataInput = document.createElement('input');
+    dataInput.type = 'hidden';
+    dataInput.name = 'order_data';
+    dataInput.value = JSON.stringify(orderData);
+    form.appendChild(dataInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Initialize with food items data
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Food ordering system initialized');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>👨‍🎓 Welcome, {% if student %}{{ student.name }}{% else %}{{ user.email }}{% endif %}!</h2>
+    <p>Your personalized student dashboard</p>
+</div>
+
+{% if student %}
+<!-- Attendance Statistics -->
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📚</div>
+        <div style="font-size: 2rem; font-weight: bold;">{{ total_classes }}</div>
+        <div style="opacity: 0.9;">Total Classes</div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">✅</div>
+        <div style="font-size: 2rem; font-weight: bold;">{{ present_classes }}</div>
+        <div style="opacity: 0.9;">Classes Attended</div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, {% if attendance_percentage >= 75 %}#4facfe 0%, #00f2fe 100%{% else %}#fa709a 0%, #fee140 100%{% endif %}); color: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">{% if attendance_percentage >= 75 %}🎯{% else %}⚠️{% endif %}</div>
+        <div style="font-size: 2rem; font-weight: bold;">{{ attendance_percentage }}%</div>
+        <div style="opacity: 0.9;">Attendance Rate</div>
+    </div>
+</div>
+
+<!-- My Attendance Section -->
+<div class="table-container" style="margin-bottom: 2rem;">
+    <div class="table-header">
+        <h3>📊 My Attendance Records</h3>
+        <a href="{% url 'attendance:attendance_home' %}" class="btn" style="background: #667eea; color: white; padding: 0.5rem 1rem; border-radius: 5px; text-decoration: none;">View All →</a>
+    </div>
+    {% if recent_attendance %}
+    <table>
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Faculty</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Mode</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in recent_attendance %}
+            <tr>
+                <td>{{ record.course.name|default:"N/A" }}</td>
+                <td>{{ record.faculty.name }}</td>
+                <td>{{ record.class_date|date:"M d, Y" }}</td>
+                <td>{{ record.class_time }}</td>
+                <td>
+                    {% if record.status == 'present' %}
+                        <span style="background: #10b981; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">✓ Present</span>
+                    {% else %}
+                        <span style="background: #ef4444; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">✗ Absent</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record.mode == 'AI' %}
+                        <span style="background: #dbeafe; color: #1e40af; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">🤖 AI</span>
+                    {% elif record.mode == 'manual' %}
+                        <span style="background: #f3f4f6; color: #374151; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">✍️ Manual</span>
+                    {% else %}
+                        <span style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">📚 Remedial</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="padding: 2rem; text-align: center; color: #6b7280;">
+        <p>No attendance records yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Today's Timetable -->
+<div class="table-container" style="margin-bottom: 2rem;">
+    <div class="table-header">
+        <h3>📅 Today's Classes ({{ current_day }})</h3>
+    </div>
+    {% if todays_schedule %}
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Course</th>
+                <th>Faculty</th>
+                <th>Classroom</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for class in todays_schedule %}
+            <tr>
+                <td style="font-weight: 600;">{{ class.start_time|date:"g:i A" }} - {{ class.end_time|date:"g:i A" }}</td>
+                <td>{{ class.course.name }}</td>
+                <td>{{ class.course.assigned_faculty.name|default:"TBA" }}</td>
+                <td>{{ class.classroom }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="padding: 2rem; text-align: center; color: #6b7280;">
+        <p>🎉 No classes scheduled for today!</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Weekly Timetable -->
+<div class="table-container" style="margin-bottom: 2rem;">
+    <div class="table-header">
+        <h3>📆 Weekly Timetable</h3>
+    </div>
+    {% if week_schedule %}
+    <div style="padding: 1rem;">
+        {% for day, classes in week_schedule.items %}
+        <div style="margin-bottom: 1.5rem;">
+            <h4 style="color: #4f46e5; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb;">
+                {% if day == current_day %}
+                    <span style="background: #4f46e5; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; margin-right: 0.5rem;">Today</span>
+                {% endif %}
+                {{ day }}
+            </h4>
+            <div style="display: grid; gap: 0.75rem;">
+                {% for class in classes %}
+                <div style="display: grid; grid-template-columns: 120px 1fr 200px 150px; gap: 1rem; padding: 0.75rem; background: #f9fafb; border-radius: 8px; align-items: center;">
+                    <div style="font-weight: 600; color: #6366f1;">
+                        {{ class.start_time|date:"g:i A" }}<br>{{ class.end_time|date:"g:i A" }}
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: #1f2937;">{{ class.course.name }}</div>
+                        <div style="font-size: 0.875rem; color: #6b7280;">{{ class.course.course_id }}</div>
+                    </div>
+                    <div style="color: #6b7280;">
+                        👨‍🏫 {{ class.course.assigned_faculty.name|default:"TBA" }}
+                    </div>
+                    <div style="color: #6b7280;">
+                        🏫 {{ class.classroom }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="padding: 2rem; text-align: center; color: #6b7280;">
+        <p>No classes scheduled yet. Your timetable will appear here once courses are assigned.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Student Profile -->
+<div class="table-container" style="margin-bottom: 2rem;">
+    <div class="table-header">
+        <h3>📝 My Profile</h3>
+    </div>
+    <div style="padding: 1rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            <div>
+                <strong style="color: var(--text-light);">Student ID:</strong>
+                <p style="font-size: 1.1rem; margin-top: 0.3rem;">{{ student.student_id }}</p>
+            </div>
+            <div>
+                <strong style="color: var(--text-light);">Email:</strong>
+                <p style="font-size: 1.1rem; margin-top: 0.3rem;">{{ student.email }}</p>
+            </div>
+            <div>
+                <strong style="color: var(--text-light);">Course:</strong>
+                <p style="font-size: 1.1rem; margin-top: 0.3rem;">{{ student.course }}</p>
+            </div>
+            <div>
+                <strong style="color: var(--text-light);">Block:</strong>
+                <p style="font-size: 1.1rem; margin-top: 0.3rem;">{{ student.block }}</p>
+            </div>
+            {% if student.parent_contact %}
+            <div>
+                <strong style="color: var(--text-light);">Parent Contact:</strong>
+                <p style="font-size: 1.1rem; margin-top: 0.3rem;">{{ student.parent_contact }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Food Orders -->
+{% if recent_orders %}
+<div class="table-container" style="margin-bottom: 2rem;">
+    <div class="table-header">
+        <h3>🍽️ Recent Food Orders</h3>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Stall</th>
+                <th>Time Slot</th>
+                <th>Total</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in recent_orders %}
+            <tr>
+                <td>#{{ order.order_id }}</td>
+                <td>{{ order.stall.name }}</td>
+                <td>{{ order.time_slot|date:"M d, h:i A" }}</td>
+                <td>₹{{ order.total_amount }}</td>
+                <td>
+                    {% if order.status == 'pending' %}
+                        <span style="background: #f59e0b; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">Pending</span>
+                    {% elif order.status == 'ready' %}
+                        <span style="background: #10b981; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">Ready</span>
+                    {% elif order.status == 'completed' %}
+                        <span style="background: #6366f1; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">Completed</span>
+                    {% else %}
+                        <span style="background: #ef4444; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">{{ order.status|title }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="padding: 1rem; text-align: center;">
+        <a href="{% url 'food:my_orders' %}" class="btn">View All Orders →</a>
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="alert alert-info">
+    Your student profile is being set up. Please contact administration if this persists.
+</div>
+{% endif %}
+
+<!-- Quick Actions -->
+{% comment %} <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+    <div class="dashboard-card" style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🍽️</div>
+        <h3 style="margin-bottom: 0.5rem;">Order Food</h3>
+        <p style="color: #6b7280; margin-bottom: 1rem;">Order from campus cafeteria</p>
+        <a href="{% url 'food:food_ordering_home' %}" class="btn" style="display: inline-block; background: #f093fb; color: white; padding: 0.5rem 1.5rem; border-radius: 5px; text-decoration: none;">Order Now →</a>
+    </div> {% endcomment %}
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="form-container">
+        <h2>Student Attendance Summary</h2>
+
+        {% if students_summary %}
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Student ID</th>
+                        <th>Total Classes</th>
+                        <th>Present Classes</th>
+                        <th>Attendance Percentage</th>
+                        <th>Risky Absentee</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for summary in students_summary %}
+                        <tr class="{% if summary.is_risky %}risky-student{% endif %}">
+                            <td>{{ summary.student.name }}</td>
+                            <td>{{ summary.student.student_id }}</td>
+                            <td>{{ summary.total_classes }}</td>
+                            <td>{{ summary.present_classes }}</td>
+                            <td>{{ summary.attendance_percentage }}</td>
+                            <td>{% if summary.is_risky %}<span style="color: red; font-weight: bold;">YES</span>{% else %}NO{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="text-align: center;">No student attendance data available.</p>
+        {% endif %}
+    </div>
+
+    <style>
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .summary-table th,
+        .summary-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .summary-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .summary-table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .summary-table tbody tr:hover {
+            background-color: #e0e0e0;
+        }
+        .risky-student {
+            background-color: #ffebee; /* Light red for risky students */
+        }
+        .risky-student:hover {
+            background-color: #ffcdd2; /* Slightly darker red on hover */
+        }
+    </style>
+{% endblock %}

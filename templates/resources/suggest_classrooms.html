@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>🔍 Find Available Classrooms</h2>
+    <p>Check classroom availability for your desired time slot</p>
+</div>
+
+<div class="login-container" style="max-width: 800px;">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="user-icon">🏫</div>
+            <h2>Classroom Availability Checker</h2>
+            <p>Enter your requirements to find available classrooms</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="start_time">
+                    <strong>Start Date & Time</strong>
+                    <span style="color: #ef4444;">*</span>
+                </label>
+                <input type="datetime-local" name="start_time" id="start_time" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="end_time">
+                    <strong>End Date & Time</strong>
+                    <span style="color: #ef4444;">*</span>
+                </label>
+                <input type="datetime-local" name="end_time" id="end_time" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="capacity_needed">
+                    <strong>Required Capacity (Number of Seats)</strong>
+                    <span style="color: #ef4444;">*</span>
+                </label>
+                <input type="number" name="capacity_needed" id="capacity_needed" class="form-control" min="1" placeholder="e.g., 50" required>
+            </div>
+
+            <button type="submit" class="btn-login" style="width: 100%;">
+                🔍 Search Available Classrooms
+            </button>
+        </form>
+    </div>
+</div>
+
+{% if suggested_classrooms %}
+<div class="table-container" style="margin-top: 2rem;">
+    <div class="table-header">
+        <h3>✅ Available Classrooms ({{ suggested_classrooms|length }} found)</h3>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Building/Block</th>
+                    <th>Room Number</th>
+                    <th>Capacity</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for classroom in suggested_classrooms %}
+                <tr>
+                    <td><strong style="color: var(--primary-color);">{{ classroom.block.name }}</strong></td>
+                    <td><span style="font-size: 1.1rem; font-weight: 600;">{{ classroom.room_number }}</span></td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.25rem;">👥</span>
+                            <strong>{{ classroom.capacity }}</strong> seats
+                        </div>
+                    </td>
+                    <td><span class="badge badge-active">Available</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.form-control {
+    width: 100%;
+    padding: 0.9rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead {
+    background: #f8fafc;
+}
+
+.data-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table tbody tr:hover {
+    background: #f8fafc;
+}
+</style>
+{% endblock %}

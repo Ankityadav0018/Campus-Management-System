@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Campus Classrooms</h2>
+    <p><a href="{% url 'resources:add_campus_classroom' %}" class="form-button">Add New Classroom</a></p>
+    <p><a href="{% url 'resources:resources_home' %}" class="form-button" style="background-color: #6c757d;">Back to Resources Home</a></p>
+
+    {% if classrooms %}
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Block</th>
+                    <th>Room Number</th>
+                    <th>Capacity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for classroom in classrooms %}
+                <tr>
+                    <td>{{ classroom.pk }}</td>
+                    <td>{{ classroom.block.name }}</td>
+                    <td>{{ classroom.room_number }}</td>
+                    <td>{{ classroom.capacity }}</td>
+                    <td>
+                        <a href="{% url 'resources:edit_campus_classroom' classroom.pk %}" class="form-button">Edit</a>
+                        <form action="{% url 'resources:delete_campus_classroom' classroom.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="form-button" style="background-color: #e74c3c;" onclick="return confirm('Are you sure you want to delete this classroom?');">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No campus classrooms found.</p>
+    {% endif %}
+{% endblock %}
