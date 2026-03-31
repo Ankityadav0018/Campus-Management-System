@@ -26,8 +26,8 @@ RUN python manage.py collectstatic --noinput
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Expose port
+# Expose port (Railway will set PORT env var)
 EXPOSE 8000
 
-# Run gunicorn
-CMD ["gunicorn", "campus_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120"]
+# Run gunicorn with dynamic PORT from environment variable
+CMD ["sh", "-c", "gunicorn campus_project.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 120"]
