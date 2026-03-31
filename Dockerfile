@@ -29,5 +29,5 @@ USER appuser
 # Expose port (Railway will set PORT env var)
 EXPOSE 8000
 
-# Run gunicorn with dynamic PORT from environment variable
-CMD ["sh", "-c", "gunicorn campus_project.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 120"]
+# Run using Python-based WSGI server (SAFEST method for dynamic PORT)
+CMD ["python", "wsgi_server.py"]
