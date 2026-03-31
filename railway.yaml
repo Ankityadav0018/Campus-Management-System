@@ -1,0 +1,43 @@
+# Railway.app deployment configuration
+
+# Define services
+services:
+  web:
+    # Build configuration
+    builder: dockerfile
+    dockerfile: Dockerfile
+    
+    # Environment variables
+    variables:
+      PORT: $PORT
+      DEBUG: false
+      PYTHONUNBUFFERED: 1
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:$PORT/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL database service
+  db:
+    image: postgres:15
+    variables:
+      POSTGRES_DB: campus_db
+      POSTGRES_USER: postgres
+    
+    # Volumes for persistent storage
+    volumes:
+      - data:/var/lib/postgresql/data
+
+# Define volumes
+volumes:
+  data:
+    driver: local
+
+# Network configuration
+networks:
+  default:
+    driver: bridge
